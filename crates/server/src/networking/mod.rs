@@ -1,21 +1,24 @@
-use std::net::{Ipv4Addr, SocketAddr};
+use std::{
+    net::{Ipv4Addr, SocketAddr},
+    sync::Arc,
+};
 
 use bevy::prelude::*;
 use common::networking::*;
 use nevy::prelude::*;
 
 pub fn build(app: &mut App) {
-    app.add_event::<ClientConnected>();
-    app.add_event::<ClientDisconnected>();
-
     app.add_plugins((
+        EndpointPlugin::default(),
         StreamHeaderPlugin::default(),
         client_server_protocol().build_deserialization(PreUpdate),
         server_client_protocol().build_serialization(),
     ));
 
-    app.add_systems(Startup, spawn_endpoint);
+    app.add_event::<ClientConnected>();
+    app.add_event::<ClientDisconnected>();
 
+    app.add_systems(Startup, spawn_endpoint);
     app.add_systems(
         PreUpdate,
         (on_connections, on_disconnections).after(UpdateEndpoints),
@@ -64,10 +67,10 @@ fn spawn_endpoint(mut commands: Commands, server_config: Res<crate::ServerConfig
     commands.spawn((
         BevyEndpoint::new(endpoint),
         EndpointStreamHeaders,
-        ClientServerMessages,
         EndpointMessagingHeader {
             header: StreamHeader::Messages.into(),
         },
+        ClientServerMessages,
         ServerEndpoint,
     ));
 }
@@ -87,6 +90,8 @@ fn on_connections(
     {
         if endpoint_q.contains(endpoint_entity) {
             commands.entity(connection_entity).insert(ClientConnection);
+
+            info!("New Connection: {}", connection_entity);
 
             connected_w.send(ClientConnected {
                 client_entity: connection_entity,
@@ -108,6 +113,8 @@ fn on_disconnections(
     } in disconnected_r.read()
     {
         if endpoint_q.contains(endpoint_entity) {
+            info!("Connection Closed: {}", connection_entity);
+
             disconnected_w.send(ClientDisconnected {
                 client_entity: connection_entity,
             });
@@ -116,20 +123,9 @@ fn on_disconnections(
 }
 
 fn create_server_endpoint_config() -> nevy::quic::quinn_proto::ServerConfig {
-    let chain = std::fs::File::open("fullchain.pem").expect("failed to open cert file");
-    let mut chain: std::io::BufReader<std::fs::File> = std::io::BufReader::new(chain);
-
-    let chain: Vec<rustls::pki_types::CertificateDer> = rustls_pemfile::certs(&mut chain)
-        .collect::<Result<_, _>>()
-        .expect("failed to load certs");
-    let mut keys = std::fs::File::open("privkey.pem").expect("failed to open key file");
-
-    let mut buf = Vec::new();
-    std::io::Read::read_to_end(&mut keys, &mut buf).unwrap();
-
-    let key = rustls_pemfile::private_key(&mut std::io::Cursor::new(&buf))
-        .expect("failed to load private key")
-        .expect("missing private key");
+    let cert = rcgen::generate_simple_self_signed(vec!["dev.shipgame".to_string()]).unwrap();
+    let key = rustls::pki_types::PrivateKeyDer::try_from(cert.key_pair.serialize_der()).unwrap();
+    let chain = cert.cert.der().clone();
 
     let mut tls_config = rustls::ServerConfig::builder_with_provider(std::sync::Arc::new(
         rustls::crypto::ring::default_provider(),
@@ -137,7 +133,7 @@ fn create_server_endpoint_config() -> nevy::quic::quinn_proto::ServerConfig {
     .with_protocol_versions(&[&rustls::version::TLS13])
     .unwrap()
     .with_no_client_auth()
-    .with_single_cert(chain, key)
+    .with_single_cert(vec![chain], key)
     .unwrap();
 
     tls_config.max_early_data_size = u32::MAX;

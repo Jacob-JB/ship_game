@@ -23,6 +23,8 @@ fn main() {
     // build rest of app
     app.add_plugins(MinimalPlugins);
 
+    networking::build(&mut app);
+
     app.run();
 }
 
@@ -33,14 +35,15 @@ struct ServerConfig {
 
 impl ServerConfig {
     fn new() -> Option<Self> {
-        let Some(port) = std::env::args().nth(1) else {
-            error!("Expected port as first argument");
-            return None;
-        };
+        let port = if let Some(port) = std::env::args().nth(1) {
+            let Ok(port) = port.parse() else {
+                error!("invalid port format \"{}\"", port);
+                return None;
+            };
 
-        let Ok(port) = port.parse() else {
-            error!("invalid port format \"{}\"", port);
-            return None;
+            port
+        } else {
+            27510
         };
 
         Some(ServerConfig { port })
