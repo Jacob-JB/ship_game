@@ -9,7 +9,7 @@ avian3d.workspace = true
 
 nevy.workspace = true
 rustls = { version = "0.23.5", default-features = false, features = ["std"] }
-rustls-pemfile = "2.1.2"
 rcgen = "0.13.1"
+serde.workspace = true
 
 common.path = "../common"

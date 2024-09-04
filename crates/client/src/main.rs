@@ -2,9 +2,12 @@ use bevy::{
     log::{Level, LogPlugin},
     prelude::*,
 };
-use networking::ConnectToEndpoint;
+use common::state::JoinRequest;
+use state::ConnectToServer;
 
 pub mod networking;
+pub mod physics;
+pub mod state;
 
 fn main() {
     let mut app = App::new();
@@ -15,18 +18,23 @@ fn main() {
     }));
 
     networking::build(&mut app);
+    state::build(&mut app);
+    physics::build(&mut app);
 
-    app.add_systems(Startup, debug_connect);
+    app.add_systems(Startup, debug_join_server);
 
     app.run();
 }
 
-fn debug_connect(mut connect_w: EventWriter<ConnectToEndpoint>) {
-    connect_w.send(ConnectToEndpoint {
-        addr: std::env::args()
+fn debug_join_server(mut connect_w: EventWriter<ConnectToServer>) {
+    connect_w.send(ConnectToServer {
+        server_addr: std::env::args()
             .nth(1)
             .expect("Expected server address as first arg")
             .parse()
             .expect("Bad server address format"),
+        join_request: JoinRequest {
+            username: "Some Username".into(),
+        },
     });
 }

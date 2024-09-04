@@ -1,11 +1,15 @@
-use std::{
-    net::{Ipv4Addr, SocketAddr},
-    sync::Arc,
-};
+use std::net::{Ipv4Addr, SocketAddr};
 
 use bevy::prelude::*;
 use common::networking::*;
 use nevy::prelude::*;
+
+pub mod messages;
+
+pub mod prelude {
+    pub use super::messages::{MessageId, MessageSender};
+    pub use super::{ClientConnected, ClientDisconnected};
+}
 
 pub fn build(app: &mut App) {
     app.add_plugins((

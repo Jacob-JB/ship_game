@@ -7,6 +7,15 @@ use bevy::prelude::*;
 use common::networking::*;
 use nevy::prelude::*;
 
+pub mod message_queue;
+pub mod messages;
+
+pub mod prelude {
+    pub use super::message_queue::{MessageQueuePlugin, QueuedMessageSender};
+    pub use super::messages::{MessageId, MessageReceiver, MessageSender};
+    pub use super::{ConnectToEndpoint, ConnectionState};
+}
+
 pub fn build(app: &mut App) {
     app.add_plugins((
         EndpointPlugin::default(),
@@ -64,7 +73,7 @@ fn spawn_endpoint(mut commands: Commands) {
         EndpointMessagingHeader {
             header: StreamHeader::Messages.into(),
         },
-        ClientServerMessages,
+        ServerClientMessages,
         ClientEndpoint,
     ));
 }
@@ -118,6 +127,9 @@ fn connect_to_simulators(
 ///
 /// includes tls and transport config
 fn create_connection_config() -> nevy::quic::quinn_proto::ClientConfig {
+    // some day I need to figure out how to do tls properly
+    // someone help me
+
     #[derive(Debug)]
     struct AlwaysVerify;
 

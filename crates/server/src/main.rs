@@ -4,6 +4,9 @@ use bevy::{
 };
 
 pub mod networking;
+pub mod physics;
+pub mod player;
+pub mod state;
 
 fn main() {
     let mut app = App::new();
@@ -24,6 +27,9 @@ fn main() {
     app.add_plugins(MinimalPlugins);
 
     networking::build(&mut app);
+    state::build(&mut app);
+    physics::build(&mut app);
+    player::build(&mut app);
 
     app.run();
 }

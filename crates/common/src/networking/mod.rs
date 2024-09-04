@@ -14,11 +14,16 @@ pub struct ClientServerMessages;
 pub fn server_client_protocol() -> ProtocolBuilder<ServerClientMessages> {
     let mut protocol = ProtocolBuilder::new();
 
+    protocol.add_message::<crate::physics::PhysicsSnapshot>();
+    protocol.add_message::<crate::physics::TimeSample>();
+
     protocol
 }
 
 pub fn client_server_protocol() -> ProtocolBuilder<ClientServerMessages> {
     let mut protocol = ProtocolBuilder::new();
+
+    protocol.add_message::<crate::state::JoinRequest>();
 
     protocol
 }

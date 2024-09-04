@@ -12,3 +12,4 @@ opt-level = 3
 bevy = "0.14"
 avian3d = "0.1"
 nevy = { git = "https://github.com/DrewRidley/nevy", features = ["quic"] }
+serde = "1.0"
