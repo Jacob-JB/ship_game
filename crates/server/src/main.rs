@@ -26,6 +26,12 @@ fn main() {
     // build rest of app
     app.add_plugins(MinimalPlugins);
 
+    // expected by [avian3d], not included in [MinimalPlugins]
+    app.add_plugins(AssetPlugin::default());
+    app.init_asset::<Mesh>();
+    app.add_plugins(bevy::scene::ScenePlugin);
+    app.add_plugins(HierarchyPlugin);
+
     networking::build(&mut app);
     state::build(&mut app);
     physics::build(&mut app);

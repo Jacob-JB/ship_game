@@ -61,14 +61,25 @@ pub struct PhysicsSnapshots {
     pub snapshots: VecDeque<PhysicsSnapshot>,
 }
 
+impl PhysicsSnapshots {
+    /// binary searches for the index of a specific time
+    ///
+    /// if there is an exact match returns that index, otherwise the index directly after
+    pub fn search(&self, time: Duration) -> usize {
+        let (Ok(index) | Err(index)) = self
+            .snapshots
+            .binary_search_by(|snapshot| snapshot.time.cmp(&time));
+
+        index
+    }
+}
+
 fn receive_physics_snapshots(
     mut messages: MessageReceiver<PhysicsSnapshot>,
     mut snapshots: ResMut<PhysicsSnapshots>,
 ) {
     for snapshot in messages.drain() {
-        let (Ok(index) | Err(index)) = snapshots
-            .snapshots
-            .binary_search_by(|s| s.time.cmp(&snapshot.time));
+        let index = snapshots.search(snapshot.time);
 
         snapshots.snapshots.insert(index, snapshot);
     }

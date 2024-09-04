@@ -4,11 +4,13 @@ use bevy::prelude::*;
 use common::networking::*;
 use nevy::prelude::*;
 
+pub mod message_queue;
 pub mod messages;
 
 pub mod prelude {
+    pub use super::message_queue::{MessageQueuePlugin, QueuedMessageSender};
     pub use super::messages::{MessageId, MessageSender};
-    pub use super::{ClientConnected, ClientDisconnected};
+    pub use super::{ClientConnected, ClientConnection, ClientDisconnected};
 }
 
 pub fn build(app: &mut App) {
@@ -25,9 +27,17 @@ pub fn build(app: &mut App) {
     app.add_systems(Startup, spawn_endpoint);
     app.add_systems(
         PreUpdate,
-        (on_connections, on_disconnections).after(UpdateEndpoints),
+        (
+            (on_connections, on_disconnections).after(UpdateEndpoints),
+            apply_deferred,
+        )
+            .in_set(InitializeClients),
     );
 }
+
+/// Where [ClientConnection] are inserted during [PreUpdate]
+#[derive(Clone, Debug, PartialEq, Eq, Hash, SystemSet)]
+pub struct InitializeClients;
 
 /// marker component for the singular server endpoint
 ///

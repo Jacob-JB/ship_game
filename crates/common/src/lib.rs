@@ -3,10 +3,11 @@ use serde::{Deserialize, Serialize};
 
 pub mod networking;
 pub mod physics;
+pub mod player;
 pub mod state;
 
 /// newtype over an entity from the server's ecs world
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, Hash)]
 pub struct ServerEntity(Entity);
 
 impl std::fmt::Display for ServerEntity {

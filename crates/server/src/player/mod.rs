@@ -1,11 +1,12 @@
+use avian3d::prelude::*;
 use bevy::prelude::*;
-use common::state::JoinRequest;
-use nevy::prelude::ReceivedMessages;
 
-use crate::{networking::ClientConnection, state::ReceiveGameUpdates};
+use crate::physics::networking::ReplicateBody;
+
+pub mod networking;
 
 pub fn build(app: &mut App) {
-    app.add_systems(Update, process_join_requests);
+    networking::build(app);
 }
 
 /// marker component for a player entity
@@ -20,71 +21,18 @@ pub struct Player {
 #[derive(Bundle)]
 struct PlayerBundle {
     player: Player,
+    rigid_body: RigidBody,
+    collider: Collider,
+    replicate_body: ReplicateBody,
 }
 
-/// exists on a [Player] entity and points to it's client entity
-///
-/// if a [Player] entity doesn't have this component then there is no
-/// connected client
-///
-/// there is a matching [ConnectedPlayer] on the client entity
-#[derive(Component)]
-pub struct ConnectedClient {
-    pub client_entity: Entity,
-}
-
-/// points to the [Player] entity if this client has one
-///
-/// there is a matching [ConnectedClient] on the player entity
-#[derive(Component)]
-pub struct ConnectedPlayer {
-    pub player_entity: Entity,
-}
-
-fn process_join_requests(
-    mut commands: Commands,
-    mut client_q: Query<
-        (
-            Entity,
-            &mut ReceivedMessages<JoinRequest>,
-            Has<ConnectedPlayer>,
-        ),
-        With<ClientConnection>,
-    >,
-) {
-    let mut connected_this_tick = Vec::new();
-
-    for (client_entity, mut messages, has_connected_player) in client_q.iter_mut() {
-        for JoinRequest { username } in messages.drain() {
-            info!(
-                "client {} wants to join with username \"{}\"",
-                client_entity, username
-            );
-
-            if has_connected_player | connected_this_tick.contains(&client_entity) {
-                warn!("client {} has already joined", client_entity);
-                continue;
-            }
-
-            connected_this_tick.push(client_entity);
-
-            let player_entity = commands
-                .spawn((
-                    PlayerBundle {
-                        player: Player { username },
-                    },
-                    ConnectedClient { client_entity },
-                ))
-                .id();
-
-            commands
-                .entity(client_entity)
-                .insert((ConnectedPlayer { player_entity }, ReceiveGameUpdates));
-
-            info!(
-                "client {} joined as player {}",
-                client_entity, player_entity
-            );
+impl PlayerBundle {
+    pub fn new(username: String) -> Self {
+        PlayerBundle {
+            player: Player { username },
+            rigid_body: RigidBody::Dynamic,
+            collider: Collider::capsule(0.25, 1.5),
+            replicate_body: ReplicateBody,
         }
     }
 }

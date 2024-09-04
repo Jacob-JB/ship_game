@@ -12,7 +12,7 @@ pub struct PhysicsSnapshot {
     pub time: Duration,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone, Copy)]
 pub struct PhysicsBodySnapshot {
     pub position: Vec3,
     pub linear_velocity: Vec3,

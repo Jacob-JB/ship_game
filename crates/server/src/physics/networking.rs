@@ -8,7 +8,7 @@ use crate::state::ReceiveGameUpdates;
 
 use common::physics::*;
 
-pub const SNAPSHOT_INTERVAL: Duration = Duration::from_millis(250);
+pub const SNAPSHOT_INTERVAL: Duration = Duration::from_millis(150);
 pub const TIME_SAMPLE_INTERVAL: Duration = Duration::from_millis(100);
 
 pub fn build(app: &mut App) {

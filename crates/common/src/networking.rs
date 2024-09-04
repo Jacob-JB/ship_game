@@ -17,6 +17,8 @@ pub fn server_client_protocol() -> ProtocolBuilder<ServerClientMessages> {
     protocol.add_message::<crate::physics::PhysicsSnapshot>();
     protocol.add_message::<crate::physics::TimeSample>();
 
+    protocol.add_message::<crate::player::NewPlayer>();
+
     protocol
 }
 

@@ -51,6 +51,8 @@ fn drain_queue<S: Send + Sync + 'static>(
     mut queue: ResMut<MessageQueue<S>>,
     mut sender: MessageSender,
 ) {
+    sender.flush();
+
     while let Some(message) = queue.queue.front_mut() {
         if message(&mut sender) {
             queue.queue.pop_front();

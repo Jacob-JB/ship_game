@@ -5,8 +5,10 @@ use bevy::{
 use common::state::JoinRequest;
 use state::ConnectToServer;
 
+pub mod entity_map;
 pub mod networking;
 pub mod physics;
+pub mod player;
 pub mod state;
 
 fn main() {
@@ -18,8 +20,10 @@ fn main() {
     }));
 
     networking::build(&mut app);
+    entity_map::build(&mut app);
     state::build(&mut app);
     physics::build(&mut app);
+    player::build(&mut app);
 
     app.add_systems(Startup, debug_join_server);
 
