@@ -38,8 +38,6 @@ fn send_time_samples(
                     time: time.elapsed(),
                 },
             );
-
-            debug!("sent sample to {}", client_entity);
         }
     }
 }

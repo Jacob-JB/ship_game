@@ -27,6 +27,8 @@ pub fn client_server_protocol() -> ProtocolBuilder<ClientServerMessages> {
 
     protocol.add_message::<crate::state::JoinRequest>();
 
+    protocol.add_message::<crate::player::ClientPlayerUpdate>();
+
     protocol
 }
 

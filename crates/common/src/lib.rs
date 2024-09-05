@@ -1,3 +1,4 @@
+use avian3d::prelude::*;
 use bevy::prelude::*;
 use serde::{Deserialize, Serialize};
 
@@ -26,4 +27,10 @@ impl From<ServerEntity> for Entity {
     fn from(value: ServerEntity) -> Self {
         value.0
     }
+}
+
+#[derive(PhysicsLayer)]
+pub enum GameLayer {
+    World,
+    Players,
 }
