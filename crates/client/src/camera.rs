@@ -9,7 +9,8 @@ use crate::player::LocalPlayer;
 
 pub fn build(app: &mut App) {
     app.add_systems(Startup, spawn_main_camera);
-    app.add_systems(Update, (toggle_cursor_lock, move_camera_to_player));
+    app.add_systems(Update, toggle_cursor_lock);
+    app.add_systems(PostUpdate, move_camera_to_player.in_set(PhysicsSet::Sync));
 }
 
 /// Marker component for the main camera.

@@ -46,6 +46,7 @@ pub struct LocalPlayerBundle {
     collider: Collider,
     locked_axes: LockedAxes,
     collision_layers: CollisionLayers,
+    restitution: Restitution,
 }
 
 impl PlayerBundle {
@@ -71,6 +72,7 @@ impl LocalPlayerBundle {
             collider: player_collider(),
             locked_axes: LockedAxes::default().lock_rotation_x().lock_rotation_z(),
             collision_layers: CollisionLayers::new([GameLayer::Players], [GameLayer::World]),
+            restitution: Restitution::PERFECTLY_INELASTIC,
         }
     }
 }

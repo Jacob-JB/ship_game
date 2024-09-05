@@ -3,6 +3,7 @@ use bevy::{
     prelude::*,
 };
 
+pub mod modules;
 pub mod networking;
 pub mod physics;
 pub mod player;
@@ -33,9 +34,9 @@ fn main() {
     app.add_plugins(HierarchyPlugin);
 
     networking::build(&mut app);
-    state::build(&mut app);
     physics::build(&mut app);
     player::build(&mut app);
+    modules::build(&mut app);
 
     app.add_systems(Startup, spawn_debug_ground);
 

@@ -31,6 +31,7 @@ struct PlayerBundle {
     replicate_body: ReplicateBody,
     locked_axes: LockedAxes,
     collision_layers: CollisionLayers,
+    restitution: Restitution,
 }
 
 impl PlayerBundle {
@@ -43,6 +44,7 @@ impl PlayerBundle {
             replicate_body: ReplicateBody,
             locked_axes: LockedAxes::default().lock_rotation_x().lock_rotation_z(),
             collision_layers: CollisionLayers::new([GameLayer::Players], [GameLayer::World]),
+            restitution: Restitution::PERFECTLY_INELASTIC,
         }
     }
 }
