@@ -5,12 +5,24 @@ use controller::PlayerInput;
 
 use super::LocalPlayer;
 
+pub const PLAYER_JUMP_SPEED: f32 = 5.;
+pub const ON_GROUND_TOLERANCE: f32 = 0.02;
+pub const RESET_FLOOR: f32 = -50.0;
+
 pub fn build(app: &mut App) {
     controller::build_player_controller(app);
 
     app.insert_resource(MouseSensitivity(Vec2::splat(0.005)));
 
-    app.add_systems(Update, (get_movement_input, get_camera_input, jump_players));
+    app.add_systems(
+        Update,
+        (
+            get_movement_input,
+            get_camera_input,
+            jump_players,
+            reset_fallen_player,
+        ),
+    );
 }
 
 pub const PLAYER_MOVE_SPEED: f32 = 5.;
@@ -74,9 +86,6 @@ fn get_camera_input(
     .unwrap();
 }
 
-pub const PLAYER_JUMP_SPEED: f32 = 5.;
-pub const ON_GROUND_TOLERANCE: f32 = 0.02;
-
 fn jump_players(
     input: Res<ButtonInput<KeyCode>>,
     mut player_q: Query<(&Position, &mut LinearVelocity), With<LocalPlayer>>,
@@ -103,5 +112,18 @@ fn jump_players(
 
     if on_ground && input.just_pressed(KeyCode::Space) {
         velocity.0 += Vec3::Y * PLAYER_JUMP_SPEED;
+    }
+}
+
+fn reset_fallen_player(
+    mut player_q: Query<(&mut Position, &mut LinearVelocity), With<LocalPlayer>>,
+) {
+    let Ok((mut position, mut linear_velocity)) = player_q.get_single_mut() else {
+        return;
+    };
+
+    if position.0.y < RESET_FLOOR {
+        position.0 = Vec3::new(0., 1., 0.);
+        *linear_velocity = LinearVelocity::default();
     }
 }

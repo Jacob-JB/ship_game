@@ -38,6 +38,11 @@ fn main() {
     camera::build(&mut app);
     modules::build(&mut app);
 
+    app.insert_resource(AmbientLight {
+        brightness: 100.0,
+        ..default()
+    });
+
     app.add_plugins(avian3d::debug_render::PhysicsDebugPlugin::default());
 
     app.add_systems(Startup, debug_join_server);

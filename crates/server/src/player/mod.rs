@@ -41,7 +41,7 @@ impl PlayerBundle {
             player: Player { username },
             player_input: PlayerInput::default(),
             rigid_body: RigidBody::Dynamic,
-            position: Position(Vec3::new(0., 3., 0.)),
+            position: Position(Vec3::new(0., 1., 0.)),
             collider: player_collider(),
             replicate_body: ReplicateBody,
             locked_axes: LockedAxes::default().lock_rotation_x().lock_rotation_z(),

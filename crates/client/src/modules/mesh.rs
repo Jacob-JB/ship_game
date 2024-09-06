@@ -23,9 +23,10 @@ fn load_static_scenes(
     {
         let scene_entity = mapper.get_or_spawn(server_entity);
 
-        info!("Loading new module {} \"{}\"", scene_entity, path);
+        info!("Loading module {} \"{}\"", scene_entity, path);
 
-        let collider = assets.load(format!("ship_modules/colliders/{}", path));
+        let collider_gltf = assets.load(format!("ship_modules/colliders/{}", path));
+        let mesh_gltf: Handle<Scene> = assets.load(format!("ship_modules/meshes/{}#Scene0", path));
 
         commands.entity(scene_entity).insert((
             TransformBundle::from_transform(Transform {
@@ -33,9 +34,12 @@ fn load_static_scenes(
                 rotation,
                 ..default()
             }),
+            mesh_gltf,
             VisibilityBundle::default(),
             RigidBody::Static,
-            GltfCollider { mesh: collider },
+            GltfCollider {
+                mesh: collider_gltf,
+            },
             CollisionLayers::new([GameLayer::World], [GameLayer::Players]),
         ));
     }
