@@ -1,7 +1,9 @@
 use bevy::{
+    gltf::GltfPlugin,
     log::{Level, LogPlugin},
     prelude::*,
 };
+use common::mesh_colliders::GltfColliderPlugin;
 
 pub mod modules;
 pub mod networking;
@@ -26,19 +28,21 @@ fn main() {
 
     // build rest of app
     app.add_plugins(MinimalPlugins);
-
-    // expected by [avian3d], not included in [MinimalPlugins]
-    app.add_plugins(AssetPlugin::default());
-    app.init_asset::<Mesh>();
+    app.add_plugins(AssetPlugin {
+        file_path: "../../assets".into(),
+        ..default()
+    });
     app.add_plugins(bevy::scene::ScenePlugin);
     app.add_plugins(HierarchyPlugin);
+    app.init_asset::<Mesh>();
+    app.add_plugins(GltfPlugin::default());
+
+    app.add_plugins(GltfColliderPlugin);
 
     networking::build(&mut app);
     physics::build(&mut app);
     player::build(&mut app);
     modules::build(&mut app);
-
-    app.add_systems(Startup, spawn_debug_ground);
 
     app.run();
 }
@@ -63,16 +67,4 @@ impl ServerConfig {
 
         Some(ServerConfig { port })
     }
-}
-
-fn spawn_debug_ground(mut commands: Commands) {
-    use avian3d::prelude::*;
-    use common::GameLayer;
-
-    commands.spawn((
-        RigidBody::Static,
-        Collider::half_space(Vec3::Y),
-        Position(Vec3::new(0., -2., 0.)),
-        CollisionLayers::new([GameLayer::World], [GameLayer::Players]),
-    ));
 }

@@ -2,6 +2,8 @@ use avian3d::prelude::*;
 use bevy::prelude::*;
 use serde::{Deserialize, Serialize};
 
+pub mod mesh_colliders;
+pub mod modules;
 pub mod networking;
 pub mod physics;
 pub mod player;

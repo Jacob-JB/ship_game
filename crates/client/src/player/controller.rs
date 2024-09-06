@@ -101,8 +101,6 @@ fn jump_players(
         )
         .is_some();
 
-    debug!("on groud: {}", on_ground);
-
     if on_ground && input.just_pressed(KeyCode::Space) {
         velocity.0 += Vec3::Y * PLAYER_JUMP_SPEED;
     }

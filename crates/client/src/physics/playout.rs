@@ -75,13 +75,13 @@ fn queue_interpolation(
     let end_index = snapshots.search(playout_time);
 
     let Some(start_index) = end_index.checked_sub(1) else {
-        warn!("Have no snapshot to start interpolation at");
+        // warn!("Have no snapshot to start interpolation at");
         return;
     };
 
     // get the snapshots
     let Some(end_snapshot) = snapshots.snapshots.get(end_index) else {
-        warn!("Have no snapshot to end interpolation at");
+        // warn!("Have no snapshot to end interpolation at");
         return;
     };
 

@@ -5,7 +5,7 @@ use super::grid::{ShipModuleGrid, ShipModuleGridSpaces, ShipModuleTransform};
 pub mod command_module;
 
 /// System set where ship module initialization
-/// code should be placed during [Update].
+/// systems should be placed during [Update].
 ///
 /// Ship module marker types get inserted before this set.
 #[derive(SystemSet, Hash, PartialEq, Eq, Debug, Clone)]
@@ -107,7 +107,11 @@ fn spawn_ship_modules(
         };
 
         let module_entity = commands
-            .spawn((ShipModule { module_type_id }, transform))
+            .spawn((
+                ShipModule { module_type_id },
+                transform,
+                transform.to_world_transform(),
+            ))
             .id();
 
         spawner(commands.entity(module_entity));

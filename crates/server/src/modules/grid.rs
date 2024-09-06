@@ -2,6 +2,9 @@ use std::collections::VecDeque;
 
 use bevy::prelude::*;
 
+/// how many world units per ship grid
+pub const SHIP_GRID_SCALE: f32 = 2.;
+
 pub fn build(app: &mut App) {
     app.init_resource::<ShipModuleGrid>();
 }
@@ -166,6 +169,26 @@ pub enum ModuleRotation {
     West,
     /// 180 degrees.
     South,
+}
+
+impl ShipModuleTransform {
+    pub fn to_world_transform(&self) -> Transform {
+        use ModuleRotation::*;
+        Transform {
+            translation: Vec3::new(
+                self.translation.x as f32 * SHIP_GRID_SCALE,
+                0.,
+                self.translation.y as f32 * SHIP_GRID_SCALE,
+            ),
+            rotation: match self.rotation {
+                East => Quat::IDENTITY,
+                North => Quat::from_rotation_y(std::f32::consts::FRAC_PI_2),
+                West => Quat::from_rotation_y(std::f32::consts::PI),
+                South => Quat::from_rotation_y(-std::f32::consts::FRAC_PI_2),
+            },
+            ..default()
+        }
+    }
 }
 
 impl ModuleRotation {
