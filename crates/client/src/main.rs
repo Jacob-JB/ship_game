@@ -39,7 +39,7 @@ fn main() {
     modules::build(&mut app);
 
     app.insert_resource(AmbientLight {
-        brightness: 500.0,
+        brightness: 2000.0,
         ..default()
     });
 
