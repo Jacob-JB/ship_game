@@ -1,7 +1,13 @@
 use bevy::prelude::*;
 
-pub mod mesh;
+pub mod load;
 
 pub fn build(app: &mut App) {
-    mesh::build(app);
+    load::build(app);
+}
+
+/// points to a ship modules sprite entity with it's own transform
+#[derive(Component)]
+pub struct ModuleMapSprite {
+    pub entity: Entity,
 }

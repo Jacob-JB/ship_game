@@ -8,11 +8,13 @@ use common::{
 use crate::physics::playout::SnapshotInterpolation;
 
 pub mod controller;
+pub mod interaction;
 pub mod networking;
 
 pub fn build(app: &mut App) {
     networking::build(app);
     controller::build(app);
+    interaction::build(app);
 }
 
 /// Marker component for a player on the client

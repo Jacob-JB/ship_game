@@ -110,7 +110,7 @@ fn spawn_ship_modules(
             .spawn((
                 ShipModule { module_type_id },
                 transform,
-                transform.to_world_transform(),
+                TransformBundle::from_transform(transform.to_world_transform()),
             ))
             .id();
 

@@ -6,6 +6,7 @@ use common::{mesh_colliders::GltfColliderPlugin, state::JoinRequest};
 use state::ConnectToServer;
 
 pub mod camera;
+pub mod elements;
 pub mod entity_map;
 pub mod modules;
 pub mod networking;
@@ -37,9 +38,10 @@ fn main() {
     player::build(&mut app);
     camera::build(&mut app);
     modules::build(&mut app);
+    elements::build(&mut app);
 
     app.insert_resource(AmbientLight {
-        brightness: 2000.0,
+        brightness: 100.0,
         ..default()
     });
 
@@ -61,4 +63,14 @@ fn debug_join_server(mut connect_w: EventWriter<ConnectToServer>) {
             username: "Some Username".into(),
         },
     });
+}
+
+/// Enumerated render layers for 2d elements that can be displayed on a map screen
+///
+/// 2d cameras can include different layers based on functionality
+pub enum ShipScreenRenderLayer {
+    /// Render layer for the ship map
+    Map = 1,
+    /// Render layer for players
+    Players = 2,
 }

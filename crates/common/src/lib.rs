@@ -2,6 +2,7 @@ use avian3d::prelude::*;
 use bevy::prelude::*;
 use serde::{Deserialize, Serialize};
 
+pub mod elements;
 pub mod mesh_colliders;
 pub mod modules;
 pub mod networking;
@@ -33,6 +34,11 @@ impl From<ServerEntity> for Entity {
 
 #[derive(PhysicsLayer)]
 pub enum GameLayer {
+    /// Mostly static elements that players collide with
     World,
+    /// Players
     Players,
+    /// Used on client for colliders that can block
+    /// or receive interaction from the player camera
+    Interaction,
 }

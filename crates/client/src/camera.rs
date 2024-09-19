@@ -1,5 +1,6 @@
 use avian3d::prelude::*;
 use bevy::{
+    core_pipeline::bloom::{BloomPlugin, BloomSettings},
     prelude::*,
     window::{CursorGrabMode, PrimaryWindow},
 };
@@ -19,7 +20,17 @@ pub struct MainCamera;
 
 /// Responsible for spawning the main camera on startup.
 fn spawn_main_camera(mut commands: Commands) {
-    commands.spawn((MainCamera, Camera3dBundle::default()));
+    commands.spawn((
+        MainCamera,
+        Camera3dBundle {
+            camera: Camera {
+                hdr: true,
+                ..default()
+            },
+            ..default()
+        },
+        BloomSettings::default(),
+    ));
 }
 
 const CAMERA_HEIGHT_OFFSET: f32 = 0.8;

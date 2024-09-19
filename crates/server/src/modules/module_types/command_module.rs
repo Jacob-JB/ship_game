@@ -1,8 +1,9 @@
 use bevy::prelude::*;
 
 use crate::{
+    elements::ship_map::ShipMapBundle,
     grid_spaces,
-    modules::{grid::ShipModuleTransform, mesh::ModuleAssetPath},
+    modules::{grid::ShipModuleTransform, networking::ModuleAssets},
 };
 
 use super::{add_ship_module_type, InitShipModules, ShipModuleDescription, SpawnShipModule};
@@ -46,8 +47,18 @@ pub struct CommandShipModule;
 
 fn init_command_modules(mut commands: Commands, module_q: Query<Entity, Added<CommandShipModule>>) {
     for module_entity in module_q.iter() {
-        commands.entity(module_entity).insert(ModuleAssetPath {
-            path: "command_module.gltf".into(),
+        commands.entity(module_entity).insert(ModuleAssets {
+            path: "command_module".into(),
+            map_offset: Vec2::new(0.0, 0.0),
+            map_size: Vec2::new(3., 3.),
         });
+
+        commands
+            .spawn(ShipMapBundle {
+                transform: Transform::from_xyz(0., 1.2, -2.)
+                    .with_rotation(Quat::from_rotation_x(-std::f32::consts::FRAC_PI_8)),
+                ..default()
+            })
+            .set_parent(module_entity);
     }
 }

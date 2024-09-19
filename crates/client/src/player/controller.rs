@@ -5,7 +5,8 @@ use controller::PlayerInput;
 
 use super::LocalPlayer;
 
-pub const PLAYER_JUMP_SPEED: f32 = 5.;
+pub const PLAYER_MOVE_SPEED: f32 = 5.;
+pub const PLAYER_JUMP_SPEED: f32 = 3.;
 pub const ON_GROUND_TOLERANCE: f32 = 0.02;
 pub const RESET_FLOOR: f32 = -50.0;
 
@@ -24,8 +25,6 @@ pub fn build(app: &mut App) {
         ),
     );
 }
-
-pub const PLAYER_MOVE_SPEED: f32 = 5.;
 
 fn get_movement_input(
     input: Res<ButtonInput<KeyCode>>,

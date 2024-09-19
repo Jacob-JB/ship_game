@@ -10,5 +10,7 @@ pub struct LoadModule {
     pub path: String,
     pub server_entity: ServerEntity,
     pub translation: Vec3,
-    pub rotation: Quat,
+    pub rotation: f32,
+    pub map_offset: Vec2,
+    pub map_size: Vec2,
 }

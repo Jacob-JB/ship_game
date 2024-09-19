@@ -5,6 +5,7 @@ use bevy::{
 };
 use common::mesh_colliders::GltfColliderPlugin;
 
+pub mod elements;
 pub mod modules;
 pub mod networking;
 pub mod physics;
@@ -34,6 +35,7 @@ fn main() {
     });
     app.add_plugins(bevy::scene::ScenePlugin);
     app.add_plugins(HierarchyPlugin);
+    app.add_plugins(TransformPlugin);
     app.init_asset::<Mesh>();
     app.add_plugins(GltfPlugin::default());
 
@@ -43,6 +45,7 @@ fn main() {
     physics::build(&mut app);
     player::build(&mut app);
     modules::build(&mut app);
+    elements::build(&mut app);
 
     app.run();
 }
