@@ -15,12 +15,12 @@
     "nodes" : [
         {
             "mesh" : 0,
-            "name" : "Plane"
+            "name" : "Mesh"
         }
     ],
     "meshes" : [
         {
-            "name" : "Plane.001",
+            "name" : "Plane.002",
             "primitives" : [
                 {
                     "attributes" : {
@@ -35,10 +35,10 @@
         {
             "bufferView" : 0,
             "componentType" : 5126,
-            "count" : 4,
+            "count" : 6,
             "max" : [
                 3,
-                0,
+                3,
                 3
             ],
             "min" : [
@@ -51,28 +51,28 @@
         {
             "bufferView" : 1,
             "componentType" : 5123,
-            "count" : 6,
+            "count" : 12,
             "type" : "SCALAR"
         }
     ],
     "bufferViews" : [
         {
             "buffer" : 0,
-            "byteLength" : 48,
+            "byteLength" : 72,
             "byteOffset" : 0,
             "target" : 34962
         },
         {
             "buffer" : 0,
-            "byteLength" : 12,
-            "byteOffset" : 48,
+            "byteLength" : 24,
+            "byteOffset" : 72,
             "target" : 34963
         }
     ],
     "buffers" : [
         {
-            "byteLength" : 60,
-            "uri" : "data:application/octet-stream;base64,AABAwAAAAAAAAEBAAABAQAAAAAAAAEBAAABAwAAAAAAAAEDAAABAQAAAAAAAAEDAAAABAAMAAAADAAIA"
+            "byteLength" : 96,
+            "uri" : "data:application/octet-stream;base64,AABAwAAAAAAAAEBAAABAQAAAAAAAAEBAAABAwAAAAAAAAEDAAABAQAAAAAAAAEDAAABAwAAAQEAAAEDAAABAQAAAQEAAAEDAAAABAAMAAAADAAIAAgADAAUAAgAFAAQA"
         }
     ]
 }

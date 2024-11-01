@@ -69,6 +69,7 @@ fn load_static_scenes(
             GltfCollider {
                 mesh: collider_gltf,
             },
+            CollisionMargin(0.),
             CollisionLayers::new([GameLayer::World], [GameLayer::Players]),
             ModuleMapSprite { entity: map_entity },
         ));

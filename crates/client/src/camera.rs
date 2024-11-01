@@ -1,6 +1,6 @@
 use avian3d::prelude::*;
 use bevy::{
-    core_pipeline::bloom::{BloomPlugin, BloomSettings},
+    core_pipeline::bloom::BloomSettings,
     prelude::*,
     window::{CursorGrabMode, PrimaryWindow},
 };

@@ -441,11 +441,5 @@ fn move_screen_camera(
             );
 
         transform.translation = (target_position.position + current_diff).extend(0.);
-
-        debug!(
-            "current {} target {}",
-            transform.translation.xy(),
-            target_position.position
-        );
     }
 }

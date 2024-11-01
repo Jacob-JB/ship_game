@@ -26,13 +26,11 @@ pub struct Player {
 struct PlayerBundle {
     player: Player,
     player_input: PlayerInput,
-    rigid_body: RigidBody,
     position: Position,
+    rotation: Rotation,
+    linear_velocity: LinearVelocity,
     collider: Collider,
     replicate_body: ReplicateBody,
-    locked_axes: LockedAxes,
-    collision_layers: CollisionLayers,
-    restitution: Restitution,
 }
 
 impl PlayerBundle {
@@ -40,13 +38,11 @@ impl PlayerBundle {
         PlayerBundle {
             player: Player { username },
             player_input: PlayerInput::default(),
-            rigid_body: RigidBody::Dynamic,
             position: Position(Vec3::new(0., 1., 0.)),
+            rotation: Rotation::default(),
+            linear_velocity: LinearVelocity::default(),
             collider: player_collider(),
             replicate_body: ReplicateBody,
-            locked_axes: LockedAxes::default().lock_rotation_x().lock_rotation_z(),
-            collision_layers: CollisionLayers::new([GameLayer::Players], [GameLayer::World]),
-            restitution: Restitution::PERFECTLY_INELASTIC,
         }
     }
 }

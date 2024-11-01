@@ -35,6 +35,7 @@ pub struct PlayerBundle {
     position: Position,
     rotation: Rotation,
     collider: Collider,
+    collision_layers: CollisionLayers,
 }
 
 /// Components for a local player
@@ -43,12 +44,11 @@ pub struct LocalPlayerBundle {
     player: Player,
     local_player: LocalPlayer,
     player_input: PlayerInput,
-    rigid_body: RigidBody,
     position: Position,
+    rotation: Rotation,
+    linear_velocity: LinearVelocity,
     collider: Collider,
-    locked_axes: LockedAxes,
     collision_layers: CollisionLayers,
-    restitution: Restitution,
 }
 
 impl PlayerBundle {
@@ -59,6 +59,7 @@ impl PlayerBundle {
             position: Position::default(),
             rotation: Rotation::default(),
             collider: player_collider(),
+            collision_layers: CollisionLayers::new([GameLayer::Players], 0),
         }
     }
 }
@@ -69,12 +70,11 @@ impl LocalPlayerBundle {
             player: Player { username },
             local_player: LocalPlayer,
             player_input: PlayerInput::default(),
-            rigid_body: RigidBody::Dynamic,
             position: Position(new_local_player.position),
+            rotation: Rotation::default(),
+            linear_velocity: LinearVelocity::default(),
             collider: player_collider(),
-            locked_axes: LockedAxes::default().lock_rotation_x().lock_rotation_z(),
-            collision_layers: CollisionLayers::new([GameLayer::Players], [GameLayer::World]),
-            restitution: Restitution::PERFECTLY_INELASTIC,
+            collision_layers: CollisionLayers::new([GameLayer::Players], 0),
         }
     }
 }

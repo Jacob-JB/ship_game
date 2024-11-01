@@ -2,8 +2,22 @@ use avian3d::prelude::*;
 use bevy::prelude::*;
 use serde::{Deserialize, Serialize};
 
+use crate::GameLayer;
+
 pub fn build_player_controller(app: &mut App) {
-    app.add_systems(Update, (accelerate_players, rotate_players));
+    app.add_systems(
+        PostUpdate,
+        (
+            (
+                (rotate_players, accelerate_players),
+                integrate_players,
+                update_player_positions,
+            )
+                .chain()
+                .in_set(PhysicsSet::StepSimulation),
+            insert_missing_position_updates.in_set(PhysicsSet::Prepare),
+        ),
+    );
 }
 
 #[derive(Component, Serialize, Deserialize, Clone, Copy)]
@@ -23,11 +37,107 @@ impl Default for PlayerInput {
 
 const PLAYER_ACCELERATION: f32 = 30.;
 
-fn accelerate_players(mut player_q: Query<(&PlayerInput, &mut LinearVelocity)>, time: Res<Time>) {
+fn accelerate_players(
+    mut player_q: Query<(&PlayerInput, &mut LinearVelocity)>,
+    gravity: Res<Gravity>,
+    time: Res<Time>,
+) {
     for (input, mut velocity) in player_q.iter_mut() {
-        let delta = (input.target_velocity - velocity.0.xz())
-            .clamp_length_max(PLAYER_ACCELERATION * time.delta_seconds());
-        velocity.0 += Vec3::new(delta.x, 0., delta.y);
+        let difference = input.target_velocity - velocity.0.xz();
+        let max_acceleration = PLAYER_ACCELERATION * time.delta_seconds();
+        let delta = difference.clamp_length_max(max_acceleration);
+        **velocity += Vec3::new(delta.x, 0., delta.y);
+
+        **velocity += gravity.0 * time.delta_seconds();
+    }
+}
+
+#[derive(Component, Default)]
+struct CharacterPositionUpdate(Vec3);
+
+fn insert_missing_position_updates(
+    mut commands: Commands,
+    chacater_q: Query<Entity, (With<PlayerInput>, Without<CharacterPositionUpdate>)>,
+) {
+    for entity in chacater_q.iter() {
+        commands
+            .entity(entity)
+            .insert(CharacterPositionUpdate::default());
+    }
+}
+
+const MAX_INTEGRATE_ITERATIONS: usize = 20;
+const PLAYER_COLLISION_MARGIN: f32 = 0.001;
+
+/// Integrates kinematic character positions.
+/// Performs collision detection and slides characters along obstacles.
+fn integrate_players(
+    mut character_q: Query<
+        (
+            Entity,
+            &mut LinearVelocity,
+            &Position,
+            &mut CharacterPositionUpdate,
+            &Rotation,
+            &Collider,
+        ),
+        With<PlayerInput>,
+    >,
+    time: Res<Time<Physics>>,
+    spatial_query: SpatialQuery,
+) {
+    for (player_entity, mut velocity, position, mut position_update, rotation, collider) in
+        character_q.iter_mut()
+    {
+        let mut position = **position;
+        let mut remaining_time = time.delta_seconds();
+
+        for _ in 0..MAX_INTEGRATE_ITERATIONS {
+            let Ok(direction) = Dir3::new(**velocity) else {
+                break;
+            };
+
+            let max_distance = remaining_time * velocity.length();
+
+            let hit = spatial_query
+                .shape_hits(
+                    collider,
+                    position,
+                    **rotation,
+                    direction,
+                    max_distance,
+                    u32::MAX,
+                    false,
+                    SpatialQueryFilter::from_mask([GameLayer::World])
+                        .with_excluded_entities(std::iter::once(player_entity)),
+                )
+                .into_iter()
+                .filter(|hit| -hit.normal1.dot(direction.into()) > 0.)
+                .next();
+
+            let Some(hit) = hit else {
+                position += direction * max_distance;
+                break;
+            };
+
+            let hit_normal = rotation.mul_vec3(-hit.normal2);
+
+            remaining_time -= hit.time_of_impact / velocity.length();
+
+            position += direction * hit.time_of_impact;
+            position += hit_normal * PLAYER_COLLISION_MARGIN;
+
+            **velocity = velocity.reject_from(hit_normal);
+        }
+
+        position_update.0 = position;
+    }
+}
+
+/// Updates character positions after [integrate_characters].
+fn update_player_positions(mut character_q: Query<(&mut Position, &CharacterPositionUpdate)>) {
+    for (mut position, position_update) in character_q.iter_mut() {
+        **position = position_update.0;
     }
 }
 
