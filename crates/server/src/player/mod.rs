@@ -11,6 +11,8 @@ pub fn build(app: &mut App) {
     networking::build(app);
 
     controller::build_player_controller(app);
+
+    app.add_systems(Update, debug_player_positions);
 }
 
 /// marker component for a player entity
@@ -31,6 +33,7 @@ struct PlayerBundle {
     linear_velocity: LinearVelocity,
     collider: Collider,
     replicate_body: ReplicateBody,
+    collision_layers: CollisionLayers,
 }
 
 impl PlayerBundle {
@@ -43,6 +46,13 @@ impl PlayerBundle {
             linear_velocity: LinearVelocity::default(),
             collider: player_collider(),
             replicate_body: ReplicateBody,
+            collision_layers: CollisionLayers::new([GameLayer::Players], 0),
         }
+    }
+}
+
+fn debug_player_positions(player_q: Query<&Position, With<Player>>) {
+    for position in player_q.iter() {
+        // debug!("{}", **position)
     }
 }

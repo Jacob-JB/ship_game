@@ -4,19 +4,25 @@ use serde::{Deserialize, Serialize};
 
 use crate::GameLayer;
 
+const PLAYER_ACCELERATION: f32 = 30.;
+const MAX_INTEGRATE_ITERATIONS: usize = 20;
+const PLAYER_COLLISION_MARGIN: f32 = 0.0005;
+
 pub fn build_player_controller(app: &mut App) {
     app.add_systems(
         PostUpdate,
+        insert_missing_position_updates.in_set(PhysicsSet::Prepare),
+    );
+
+    app.add_systems(
+        PostUpdate,
         (
-            (
-                (rotate_players, accelerate_players),
-                integrate_players,
-                update_player_positions,
-            )
-                .chain()
-                .in_set(PhysicsSet::StepSimulation),
-            insert_missing_position_updates.in_set(PhysicsSet::Prepare),
-        ),
+            (rotate_players, accelerate_players),
+            integrate_players,
+            update_player_positions,
+        )
+            .chain()
+            .in_set(PhysicsSet::StepSimulation),
     );
 }
 
@@ -35,7 +41,19 @@ impl Default for PlayerInput {
     }
 }
 
-const PLAYER_ACCELERATION: f32 = 30.;
+fn rotate_players(mut player_q: Query<(&PlayerInput, &mut Rotation)>) {
+    for (input, mut rotation) in player_q.iter_mut() {
+        let face_direction = Vec3 {
+            y: 0.,
+            ..input.look_direction.into()
+        }
+        .normalize();
+
+        rotation.0 = Transform::default()
+            .looking_to(face_direction, Vec3::Y)
+            .rotation;
+    }
+}
 
 fn accelerate_players(
     mut player_q: Query<(&PlayerInput, &mut LinearVelocity)>,
@@ -66,9 +84,6 @@ fn insert_missing_position_updates(
     }
 }
 
-const MAX_INTEGRATE_ITERATIONS: usize = 20;
-const PLAYER_COLLISION_MARGIN: f32 = 0.001;
-
 /// Integrates kinematic character positions.
 /// Performs collision detection and slides characters along obstacles.
 fn integrate_players(
@@ -83,7 +98,7 @@ fn integrate_players(
         ),
         With<PlayerInput>,
     >,
-    time: Res<Time<Physics>>,
+    time: Res<Time>,
     spatial_query: SpatialQuery,
 ) {
     for (player_entity, mut velocity, position, mut position_update, rotation, collider) in
@@ -131,6 +146,8 @@ fn integrate_players(
         }
 
         position_update.0 = position;
+
+        debug!("final velocity {}", **velocity);
     }
 }
 
@@ -138,19 +155,5 @@ fn integrate_players(
 fn update_player_positions(mut character_q: Query<(&mut Position, &CharacterPositionUpdate)>) {
     for (mut position, position_update) in character_q.iter_mut() {
         **position = position_update.0;
-    }
-}
-
-fn rotate_players(mut player_q: Query<(&PlayerInput, &mut Rotation)>) {
-    for (input, mut rotation) in player_q.iter_mut() {
-        let face_direction = Vec3 {
-            y: 0.,
-            ..input.look_direction.into()
-        }
-        .normalize();
-
-        rotation.0 = Transform::default()
-            .looking_to(face_direction, Vec3::Y)
-            .rotation;
     }
 }

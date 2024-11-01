@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use common::mesh_colliders::GltfCollider;
 
 use crate::{
     elements::ship_map::ShipMapBundle,
@@ -45,13 +46,22 @@ pub fn build(app: &mut App) {
 #[derive(Component, Default)]
 pub struct CommandShipModule;
 
-fn init_command_modules(mut commands: Commands, module_q: Query<Entity, Added<CommandShipModule>>) {
+fn init_command_modules(
+    mut commands: Commands,
+    module_q: Query<Entity, Added<CommandShipModule>>,
+    assets: Res<AssetServer>,
+) {
     for module_entity in module_q.iter() {
-        commands.entity(module_entity).insert(ModuleAssets {
-            path: "command_module".into(),
-            map_offset: Vec2::new(0.0, 0.0),
-            map_size: Vec2::new(3., 3.),
-        });
+        let mesh = assets.load("ship_modules/colliders/command_module.gltf");
+
+        commands.entity(module_entity).insert((
+            ModuleAssets {
+                path: "command_module".into(),
+                map_offset: Vec2::new(0.0, 0.0),
+                map_size: Vec2::new(3., 3.),
+            },
+            GltfCollider { mesh },
+        ));
 
         commands
             .spawn(ShipMapBundle {

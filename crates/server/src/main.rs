@@ -1,3 +1,5 @@
+use std::time::{Duration, Instant};
+
 use bevy::{
     gltf::GltfPlugin,
     log::{Level, LogPlugin},
@@ -11,6 +13,8 @@ pub mod networking;
 pub mod physics;
 pub mod player;
 pub mod state;
+
+const SERVER_TICK_INTERVAL: Duration = Duration::from_millis(10);
 
 fn main() {
     let mut app = App::new();
@@ -37,6 +41,7 @@ fn main() {
     app.add_plugins(HierarchyPlugin);
     app.add_plugins(TransformPlugin);
     app.init_asset::<Mesh>();
+    app.init_asset::<StandardMaterial>();
     app.add_plugins(GltfPlugin::default());
 
     app.add_plugins(GltfColliderPlugin);
@@ -46,6 +51,8 @@ fn main() {
     player::build(&mut app);
     modules::build(&mut app);
     elements::build(&mut app);
+
+    app.add_systems(Last, tick_delay);
 
     app.run();
 }
@@ -70,4 +77,22 @@ impl ServerConfig {
 
         Some(ServerConfig { port })
     }
+}
+
+#[derive(Resource)]
+struct ServerStart(Instant);
+
+impl Default for ServerStart {
+    fn default() -> Self {
+        ServerStart(Instant::now())
+    }
+}
+
+fn tick_delay(server_start: Local<ServerStart>, mut last_tick: Local<Duration>) {
+    let elapsed = server_start.0.elapsed().saturating_sub(*last_tick);
+    let remaining = SERVER_TICK_INTERVAL.saturating_sub(elapsed);
+
+    std::thread::sleep(remaining);
+
+    *last_tick = server_start.0.elapsed();
 }
