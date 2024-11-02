@@ -1,17 +1,7 @@
 use std::time::Duration;
 
 use avian3d::prelude::*;
-use bevy::{
-    prelude::*,
-    render::{
-        camera::{RenderTarget, ScalingMode},
-        render_resource::{
-            Extent3d, TextureDescriptor, TextureDimension, TextureFormat, TextureUsages,
-        },
-        texture::{ImageFilterMode, ImageSampler, ImageSamplerDescriptor},
-        view::RenderLayers,
-    },
-};
+use bevy::prelude::*;
 use common::{
     elements::{NewShipMap, ShipMapMoveRequest, ShipMapPositionUpdate},
     GameLayer,
@@ -21,6 +11,7 @@ use crate::{
     entity_map::{LocalServerEntity, ServerEntityMap, ServerEntityMapper},
     networking::prelude::*,
     player::interaction::{Interactable, InteractionTarget},
+    screens::*,
     ShipScreenRenderLayer,
 };
 
@@ -28,7 +19,7 @@ const SHIP_MAP_MOVE_SPEED: f32 = 5.;
 const SHIP_MAP_MOVE_FLUSH_INTERVAL: Duration = Duration::from_millis(100);
 
 pub fn build(app: &mut App) {
-    app.init_resource::<ScreenAssets>();
+    app.init_resource::<MapAssets>();
 
     app.add_systems(
         Update,
@@ -44,17 +35,13 @@ pub fn build(app: &mut App) {
 }
 
 #[derive(Resource)]
-struct ScreenAssets {
-    screen_mesh: Handle<Mesh>,
+struct MapAssets {
     key_model: Handle<Scene>,
 }
 
-impl FromWorld for ScreenAssets {
+impl FromWorld for MapAssets {
     fn from_world(world: &mut World) -> Self {
-        ScreenAssets {
-            screen_mesh: world
-                .resource_mut::<Assets<Mesh>>()
-                .add(Rectangle::new(0.5, 0.5)),
+        MapAssets {
             key_model: world
                 .resource::<AssetServer>()
                 .load("arrow_button.gltf#Scene0"),
@@ -63,11 +50,6 @@ impl FromWorld for ScreenAssets {
 }
 
 const SCREEN_IMAGE_SIZE: u32 = 128;
-
-#[derive(Component)]
-struct ScreenCamera {
-    camera_entity: Entity,
-}
 
 #[derive(Component)]
 struct ScreenTargetPosition {
@@ -93,9 +75,8 @@ pub struct ShipMapKey {
 fn spawn_screens(
     mut commands: Commands,
     mut messages: MessageReceiver<NewShipMap>,
-    mut image_assets: ResMut<Assets<Image>>,
-    mut material_assets: ResMut<Assets<StandardMaterial>>,
-    screen_assets: Res<ScreenAssets>,
+    mut screens: Screens,
+    screen_assets: Res<MapAssets>,
     mut map: ServerEntityMapper,
 ) {
     for NewShipMap {
@@ -107,75 +88,19 @@ fn spawn_screens(
     {
         info!("new ship map at {}", translation);
 
-        let size = Extent3d {
-            width: SCREEN_IMAGE_SIZE,
-            height: SCREEN_IMAGE_SIZE,
-            ..default()
-        };
-
-        let mut image = Image {
-            texture_descriptor: TextureDescriptor {
-                label: Some("Screen image"),
-                size,
-                dimension: TextureDimension::D2,
-                format: TextureFormat::Bgra8UnormSrgb,
-                mip_level_count: 1,
-                sample_count: 1,
-                usage: TextureUsages::TEXTURE_BINDING
-                    | TextureUsages::COPY_DST
-                    | TextureUsages::RENDER_ATTACHMENT,
-                view_formats: &[],
-            },
-            sampler: ImageSampler::Descriptor(ImageSamplerDescriptor {
-                mag_filter: ImageFilterMode::Nearest,
-                min_filter: ImageFilterMode::Nearest,
-                ..default()
-            }),
-            ..default()
-        };
-
-        image.resize(size);
-
-        let image = image_assets.add(image);
-
-        let camera_entity = commands
-            .spawn((
-                Camera2dBundle {
-                    camera: Camera {
-                        order: -1,
-                        target: RenderTarget::Image(image.clone()),
-                        clear_color: ClearColorConfig::Custom(Color::BLACK),
-                        ..default()
-                    },
-                    projection: OrthographicProjection {
-                        near: -1000.,
-                        far: 1000.,
-                        scale: state.zoom,
-                        scaling_mode: ScalingMode::Fixed {
-                            width: 1.,
-                            height: 1.,
-                        },
-                        ..default()
-                    },
-                    transform: Transform::from_translation(state.position.extend(0.)),
-                    ..default()
-                },
-                RenderLayers::from_layers(&[
-                    ShipScreenRenderLayer::Map as usize,
-                    ShipScreenRenderLayer::Players as usize,
-                ]),
-            ))
-            .id();
-
-        let material = material_assets.add(StandardMaterial {
-            base_color: Color::BLACK,
-            emissive: LinearRgba::WHITE * 10.,
-            emissive_texture: Some(image),
-            perceptual_roughness: 0.,
-            ..default()
-        });
-
         let map_entity = map.get_or_spawn(entity);
+
+        screens.create_screen(
+            map_entity,
+            UVec2::splat(SCREEN_IMAGE_SIZE),
+            Transform::from_translation(translation).with_rotation(rotation),
+            state.zoom,
+            state.position,
+            &[
+                ShipScreenRenderLayer::Map as usize,
+                ShipScreenRenderLayer::Players as usize,
+            ],
+        );
 
         let key_bundle = (
             SceneBundle {
@@ -195,7 +120,7 @@ fn spawn_screens(
                 ShipMapKey {
                     pressed: false,
                     map_entity,
-                    offset: Vec3::new(-0.15, -0.4, 0.),
+                    offset: Vec3::new(-0.15, -0.35, 0.),
                 },
                 Rotation(rotation.mul_quat(Quat::from_euler(
                     EulerRot::XZY,
@@ -212,7 +137,7 @@ fn spawn_screens(
                 ShipMapKey {
                     pressed: false,
                     map_entity,
-                    offset: Vec3::new(-0.05, -0.4, 0.),
+                    offset: Vec3::new(-0.05, -0.35, 0.),
                 },
                 Rotation(rotation.mul_quat(Quat::from_euler(
                     EulerRot::XZY,
@@ -229,7 +154,7 @@ fn spawn_screens(
                 ShipMapKey {
                     pressed: false,
                     map_entity,
-                    offset: Vec3::new(0.05, -0.4, 0.),
+                    offset: Vec3::new(0.05, -0.35, 0.),
                 },
                 Rotation(rotation.mul_quat(Quat::from_euler(
                     EulerRot::XZY,
@@ -246,7 +171,7 @@ fn spawn_screens(
                 ShipMapKey {
                     pressed: false,
                     map_entity,
-                    offset: Vec3::new(0.15, -0.4, 0.),
+                    offset: Vec3::new(0.15, -0.35, 0.),
                 },
                 Rotation(rotation.mul_quat(Quat::from_euler(
                     EulerRot::XZY,
@@ -258,13 +183,6 @@ fn spawn_screens(
             .id();
 
         commands.entity(map_entity).insert((
-            MaterialMeshBundle {
-                mesh: screen_assets.screen_mesh.clone(),
-                material,
-                transform: Transform::from_translation(translation).with_rotation(rotation),
-                ..default()
-            },
-            ScreenCamera { camera_entity },
             ScreenTargetPosition {
                 position: state.position,
             },
@@ -380,7 +298,7 @@ fn move_ship_map(
 fn update_ship_maps(
     mut messages: MessageReceiver<ShipMapPositionUpdate>,
     entity_map: Res<ServerEntityMap>,
-    mut map_q: Query<(&ScreenCamera, &mut ScreenTargetPosition)>,
+    mut map_q: Query<(&Screen, &mut ScreenTargetPosition)>,
     mut camera_q: Query<&mut OrthographicProjection>,
 ) {
     for ShipMapPositionUpdate { entity, position } in messages.drain() {
@@ -415,7 +333,7 @@ fn update_ship_maps(
 }
 
 fn move_screen_camera(
-    map_q: Query<(Entity, &ScreenCamera, &ScreenTargetPosition)>,
+    map_q: Query<(Entity, &Screen, &ScreenTargetPosition)>,
     mut camera_q: Query<&mut Transform>,
     time: Res<Time>,
 ) {

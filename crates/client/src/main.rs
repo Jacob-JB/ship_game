@@ -12,6 +12,7 @@ pub mod modules;
 pub mod networking;
 pub mod physics;
 pub mod player;
+pub mod screens;
 pub mod state;
 
 fn main() {
@@ -38,6 +39,7 @@ fn main() {
     player::build(&mut app);
     camera::build(&mut app);
     modules::build(&mut app);
+    screens::build(&mut app);
     elements::build(&mut app);
 
     app.insert_resource(AmbientLight {

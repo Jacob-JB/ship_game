@@ -4,7 +4,7 @@ use common::GameLayer;
 
 use crate::camera::MainCamera;
 
-const INTERACTION_DISTANCE: f32 = 2.;
+pub const INTERACTION_DISTANCE: f32 = 2.;
 
 pub fn build(app: &mut App) {
     app.add_systems(Update, (set_interaction_target, debug_interaction).chain());

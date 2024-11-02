@@ -146,8 +146,6 @@ fn integrate_players(
         }
 
         position_update.0 = position;
-
-        debug!("final velocity {}", **velocity);
     }
 }
 
