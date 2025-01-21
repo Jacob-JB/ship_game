@@ -103,10 +103,7 @@ fn spawn_screens(
         );
 
         let key_bundle = (
-            SceneBundle {
-                scene: screen_assets.key_model.clone(),
-                ..default()
-            },
+            SceneRoot(screen_assets.key_model.clone()),
             Position::default(),
             Collider::cuboid(0.1, 0.05, 0.1),
             CollisionLayers::new([GameLayer::Interaction], 0),
@@ -274,7 +271,7 @@ fn move_ship_map(
             }
         }
 
-        map.move_acc += move_dir.normalize_or_zero() * SHIP_MAP_MOVE_SPEED * time.delta_seconds();
+        map.move_acc += move_dir.normalize_or_zero() * SHIP_MAP_MOVE_SPEED * time.delta_secs();
     }
 
     if time.elapsed() > *last_flush + SHIP_MAP_MOVE_FLUSH_INTERVAL {
@@ -348,7 +345,7 @@ fn move_screen_camera(
 
         // move the ship map towards the target at the move speed
         let move_diff = (target_position.position - transform.translation.xy())
-            .clamp_length_max(SHIP_MAP_MOVE_SPEED * time.delta_seconds());
+            .clamp_length_max(SHIP_MAP_MOVE_SPEED * time.delta_secs());
 
         transform.translation += move_diff.extend(0.);
 

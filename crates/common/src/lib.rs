@@ -32,9 +32,10 @@ impl From<ServerEntity> for Entity {
     }
 }
 
-#[derive(PhysicsLayer)]
+#[derive(Default, PhysicsLayer)]
 pub enum GameLayer {
     /// Mostly static elements that players collide with
+    #[default]
     World,
     /// Players
     Players,

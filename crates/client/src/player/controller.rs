@@ -103,9 +103,12 @@ fn jump_players(
             position,
             Quat::IDENTITY,
             Dir3::NEG_Y,
-            ON_GROUND_TOLERANCE,
-            true,
-            SpatialQueryFilter::from_mask([GameLayer::World]),
+            &ShapeCastConfig {
+                max_distance: ON_GROUND_TOLERANCE,
+                ignore_origin_penetration: true,
+                ..default()
+            },
+            &SpatialQueryFilter::from_mask([GameLayer::World]),
         )
         .is_some();
 
