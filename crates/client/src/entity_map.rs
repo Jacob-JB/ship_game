@@ -118,7 +118,7 @@ impl<'w, 's> ServerEntityMapper<'w, 's> {
 
             debug_assert!(
                 !self.map.insert(server_entity, client_entity),
-                "Should only be called if there is no conflict"
+                "Should not be reachable if an entity is already in the map"
             );
 
             client_entity

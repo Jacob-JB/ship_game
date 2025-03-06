@@ -20,6 +20,7 @@ pub fn server_client_protocol() -> ProtocolBuilder<ServerClientMessages> {
     protocol.add_message::<crate::modules::LoadModule>();
     protocol.add_message::<crate::elements::NewShipMap>();
     protocol.add_message::<crate::elements::ShipMapPositionUpdate>();
+    protocol.add_message::<crate::elements::NewTank>();
 
     protocol
 }

@@ -47,10 +47,13 @@ pub struct VentFillRate {
     pub rate: f32,
 }
 
-#[derive(Component)]
+#[derive(Component, Default)]
 pub struct AtmosphereTank {
+    /// maximum `level` of the tank
     pub volume: f32,
+    /// how many grid atmospheres are in the tank
     pub level: f32,
+    /// whether the tank is being used to fill rooms
     pub enabled: bool,
 }
 

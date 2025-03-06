@@ -9,7 +9,7 @@ opt-level = 1
 opt-level = 3
 
 [workspace.dependencies]
-bevy = "0.14"
-avian3d = "0.1"
-nevy = { git = "https://github.com/DrewRidley/nevy", features = ["quic"] }
+bevy = "0.15"
+avian3d = "0.2"
+nevy = { git = "https://github.com/Space-Bandits/nevy", features = ["quic"] }
 serde = "1.0"

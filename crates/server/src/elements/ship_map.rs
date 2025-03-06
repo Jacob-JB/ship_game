@@ -78,7 +78,6 @@ fn replicate_existing_ship_maps(
 ) {
     for client_entity in client_q.iter() {
         for (map_entity, map, transform) in map_q.iter() {
-            info!("sent ship map");
             messages.send(
                 *message_id,
                 client_entity,

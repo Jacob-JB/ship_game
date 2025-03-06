@@ -7,12 +7,50 @@ use bevy::{
             Extent3d, TextureDescriptor, TextureDimension, TextureFormat, TextureUsages,
         },
         texture::{ImageFilterMode, ImageSampler, ImageSamplerDescriptor},
-        view::RenderLayers,
+        view::{Layer, RenderLayers},
     },
 };
 
+/// Enumerated static render layers for 2d elements that can be displayed on a map screen
+///
+/// 2d cameras can include different layers based on functionality
+///
+/// Some cameras require unique render layers that aren't shared,
+/// use [RenderLayerAllocator] to allocate these layers at runtime
+pub enum ScreenRenderLayer {
+    /// Render layer for the ship map
+    Map = 1,
+    /// Render layer for players
+    Players = 2,
+    /// The first dynamically allocated render layer
+    Dynamic = 3,
+}
+
 pub fn build(app: &mut App) {
+    app.init_resource::<RenderLayerAllocater>();
     app.init_resource::<ScreenMesh>();
+}
+
+/// Use this resource to allocate render layers at runtime
+#[derive(Resource)]
+pub struct RenderLayerAllocater {
+    next_layer: usize,
+}
+
+impl Default for RenderLayerAllocater {
+    fn default() -> Self {
+        RenderLayerAllocater {
+            next_layer: ScreenRenderLayer::Dynamic as usize,
+        }
+    }
+}
+
+impl RenderLayerAllocater {
+    pub fn next(&mut self) -> usize {
+        let layer = self.next_layer;
+        self.next_layer += 1;
+        layer
+    }
 }
 
 #[derive(Resource)]
@@ -52,7 +90,7 @@ impl<'w, 's> Screens<'w, 's> {
         transform: Transform,
         scale: f32,
         translation: Vec2,
-        render_layers: &[usize],
+        render_layers: &[Layer],
     ) -> Entity {
         let size = Extent3d {
             width: resolution.x,

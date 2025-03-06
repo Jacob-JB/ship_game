@@ -4,7 +4,7 @@ use common::{mesh_colliders::GltfCollider, modules::LoadModule, GameLayer};
 
 use crate::{
     entity_map::ServerEntityMapper, modules::ModuleMapSprite, networking::prelude::*,
-    ShipScreenRenderLayer,
+    screens::ScreenRenderLayer,
 };
 
 pub fn build(app: &mut App) {
@@ -53,7 +53,7 @@ fn load_static_scenes(
                     },
                     ..default()
                 },
-                RenderLayers::from_layers(&[ShipScreenRenderLayer::Map as usize]),
+                RenderLayers::from_layers(&[ScreenRenderLayer::Map as usize]),
             ))
             .id();
 

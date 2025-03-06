@@ -22,6 +22,7 @@ fn main() {
         DefaultPlugins
             .set(LogPlugin {
                 level: Level::DEBUG,
+                filter: "wgpu=error,naga=warn,bevy_render=warn,bevy_app=warn".into(),
                 ..default()
             })
             .set(AssetPlugin {
@@ -65,14 +66,4 @@ fn debug_join_server(mut connect_w: EventWriter<ConnectToServer>) {
             username: "Some Username".into(),
         },
     });
-}
-
-/// Enumerated render layers for 2d elements that can be displayed on a map screen
-///
-/// 2d cameras can include different layers based on functionality
-pub enum ShipScreenRenderLayer {
-    /// Render layer for the ship map
-    Map = 1,
-    /// Render layer for players
-    Players = 2,
 }

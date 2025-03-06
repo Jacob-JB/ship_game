@@ -12,14 +12,13 @@ use crate::{
     networking::prelude::*,
     player::interaction::{Interactable, InteractionTarget},
     screens::*,
-    ShipScreenRenderLayer,
 };
 
 const SHIP_MAP_MOVE_SPEED: f32 = 5.;
 const SHIP_MAP_MOVE_FLUSH_INTERVAL: Duration = Duration::from_millis(100);
 
 pub fn build(app: &mut App) {
-    app.init_resource::<MapAssets>();
+    app.init_resource::<KeyScene>();
 
     app.add_systems(
         Update,
@@ -35,17 +34,15 @@ pub fn build(app: &mut App) {
 }
 
 #[derive(Resource)]
-struct MapAssets {
-    key_model: Handle<Scene>,
-}
+struct KeyScene(Handle<Scene>);
 
-impl FromWorld for MapAssets {
+impl FromWorld for KeyScene {
     fn from_world(world: &mut World) -> Self {
-        MapAssets {
-            key_model: world
+        KeyScene(
+            world
                 .resource::<AssetServer>()
                 .load("arrow_button.gltf#Scene0"),
-        }
+        )
     }
 }
 
@@ -76,7 +73,7 @@ fn spawn_screens(
     mut commands: Commands,
     mut messages: MessageReceiver<NewShipMap>,
     mut screens: Screens,
-    screen_assets: Res<MapAssets>,
+    screen_assets: Res<KeyScene>,
     mut map: ServerEntityMapper,
 ) {
     for NewShipMap {
@@ -97,14 +94,14 @@ fn spawn_screens(
             state.zoom,
             state.position,
             &[
-                ShipScreenRenderLayer::Map as usize,
-                ShipScreenRenderLayer::Players as usize,
+                ScreenRenderLayer::Map as usize,
+                ScreenRenderLayer::Players as usize,
             ],
         );
 
         let key_bundle = (
             SceneBundle {
-                scene: screen_assets.key_model.clone(),
+                scene: screen_assets.0.clone(),
                 ..default()
             },
             Position::default(),

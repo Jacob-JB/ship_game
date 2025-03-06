@@ -22,6 +22,7 @@ fn main() {
     // start logging first
     app.add_plugins(LogPlugin {
         level: Level::DEBUG,
+        filter: "wgpu=error,naga=warn,bevy_app=warn".into(),
         ..default()
     });
 

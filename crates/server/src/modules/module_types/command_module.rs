@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use common::mesh_colliders::GltfCollider;
 
 use crate::{
-    elements::ship_map::ShipMapBundle,
+    elements::{ship_map::ShipMapBundle, tank::TankBundle},
     grid_spaces,
     modules::{grid::ShipModuleTransform, networking::ModuleAssets},
 };
@@ -67,6 +67,14 @@ fn init_command_modules(
             .spawn(ShipMapBundle {
                 transform: Transform::from_xyz(0., 1.2, -2.)
                     .with_rotation(Quat::from_rotation_x(-std::f32::consts::FRAC_PI_8)),
+                ..default()
+            })
+            .set_parent(module_entity);
+
+        commands
+            .spawn(TankBundle {
+                transform: Transform::from_xyz(-2., 1.8, 2.75)
+                    .with_rotation(Quat::from_rotation_y(std::f32::consts::PI)),
                 ..default()
             })
             .set_parent(module_entity);

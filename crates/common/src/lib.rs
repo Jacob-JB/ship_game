@@ -16,7 +16,7 @@ pub struct ServerEntity(Entity);
 
 impl std::fmt::Display for ServerEntity {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "Server({})", self)
+        write!(f, "Server({})", Entity::from(*self))
     }
 }
 
@@ -32,9 +32,10 @@ impl From<ServerEntity> for Entity {
     }
 }
 
-#[derive(PhysicsLayer)]
+#[derive(Default, PhysicsLayer)]
 pub enum GameLayer {
     /// Mostly static elements that players collide with
+    #[default]
     World,
     /// Players
     Players,

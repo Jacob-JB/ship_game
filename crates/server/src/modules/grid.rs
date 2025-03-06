@@ -1,5 +1,6 @@
 use std::collections::VecDeque;
 
+use avian3d::prelude::PhysicsSet;
 use bevy::prelude::*;
 
 /// how many world units per ship grid
@@ -7,6 +8,8 @@ pub const SHIP_GRID_SCALE: f32 = 2.;
 
 pub fn build(app: &mut App) {
     app.init_resource::<ShipModuleGrid>();
+
+    app.add_systems(PostUpdate, update_grid_presence.after(PhysicsSet::Sync));
 }
 
 /// Server side resource that contains the locations of modules in the grid
@@ -270,4 +273,24 @@ macro_rules! grid_spaces {
             spaces: vec![$(IVec2::new($x, $y)),*],
         }
     };
+}
+
+/// When on an entity with a [GlobalTransform] will be updated with the current grid index and module
+#[derive(Component, Default)]
+pub struct ShipGridPresence {
+    pub grid_index: IVec2,
+    pub current_module: Option<Entity>,
+}
+
+fn update_grid_presence(
+    mut presence_q: Query<(&mut ShipGridPresence, &GlobalTransform)>,
+    grid: Res<ShipModuleGrid>,
+) {
+    for (mut presence, position) in presence_q.iter_mut() {
+        let position = position.translation();
+        presence.grid_index.x = (position.x / SHIP_GRID_SCALE).round() as i32;
+        presence.grid_index.y = (position.z / SHIP_GRID_SCALE).round() as i32;
+
+        presence.current_module = grid.get(presence.grid_index);
+    }
 }

@@ -62,11 +62,11 @@ fn accelerate_players(
 ) {
     for (input, mut velocity) in player_q.iter_mut() {
         let difference = input.target_velocity - velocity.0.xz();
-        let max_acceleration = PLAYER_ACCELERATION * time.delta_seconds();
+        let max_acceleration = PLAYER_ACCELERATION * time.delta_secs();
         let delta = difference.clamp_length_max(max_acceleration);
         **velocity += Vec3::new(delta.x, 0., delta.y);
 
-        **velocity += gravity.0 * time.delta_seconds();
+        **velocity += gravity.0 * time.delta_secs();
     }
 }
 
@@ -105,7 +105,7 @@ fn integrate_players(
         character_q.iter_mut()
     {
         let mut position = **position;
-        let mut remaining_time = time.delta_seconds();
+        let mut remaining_time = time.delta_secs();
 
         for _ in 0..MAX_INTEGRATE_ITERATIONS {
             let Ok(direction) = Dir3::new(**velocity) else {

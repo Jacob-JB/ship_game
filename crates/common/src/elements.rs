@@ -31,3 +31,18 @@ pub struct ShipMapMoveRequest {
     pub entity: ServerEntity,
     pub delta: Vec2,
 }
+
+/// Message from server to client to initialize a new tank element
+#[derive(Serialize, Deserialize)]
+pub struct NewTank {
+    pub entity: ServerEntity,
+    pub translation: Vec3,
+    pub rotation: Quat,
+    pub state: TankState,
+}
+
+/// The state of a tank
+#[derive(Serialize, Deserialize)]
+pub struct TankState {
+    pub enabled: bool,
+}
