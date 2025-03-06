@@ -120,10 +120,12 @@ fn integrate_players(
                     position,
                     **rotation,
                     direction,
-                    max_distance,
                     u32::MAX,
-                    false,
-                    SpatialQueryFilter::from_mask([GameLayer::World])
+                    &ShapeCastConfig {
+                        max_distance,
+                        ..default()
+                    },
+                    &SpatialQueryFilter::from_mask([GameLayer::World])
                         .with_excluded_entities(std::iter::once(player_entity)),
                 )
                 .into_iter()
@@ -137,9 +139,9 @@ fn integrate_players(
 
             let hit_normal = rotation.mul_vec3(-hit.normal2);
 
-            remaining_time -= hit.time_of_impact / velocity.length();
+            remaining_time -= hit.distance / velocity.length();
 
-            position += direction * hit.time_of_impact;
+            position += direction * hit.distance;
             position += hit_normal * PLAYER_COLLISION_MARGIN;
 
             **velocity = velocity.reject_from(hit_normal);

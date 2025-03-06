@@ -30,8 +30,7 @@ fn drain_breached_atmospheres(
 ) {
     for mut atmosphere in module_q.iter_mut() {
         if atmosphere.breached {
-            atmosphere.level =
-                (atmosphere.level - breach_speed.rate * time.elapsed_seconds()).max(0.);
+            atmosphere.level = (atmosphere.level - breach_speed.rate * time.delta_secs()).max(0.);
         }
     }
 }
@@ -65,7 +64,7 @@ fn fill_atmospheres(
 ) {
     let vent_flow = |atmosphere: &ModuleAtmosphere| {
         let difference = (atmosphere.level - atmosphere.volume).max(0.);
-        difference.min(difference * fill_rate.rate * time.elapsed_seconds())
+        difference.min(difference * fill_rate.rate * time.delta_secs())
     };
 
     let available_atmosphere = tank_q

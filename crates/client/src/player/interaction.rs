@@ -40,7 +40,7 @@ fn set_interaction_target(
         camera_transform.forward(),
         INTERACTION_DISTANCE,
         true,
-        SpatialQueryFilter::from_mask([GameLayer::Interaction]),
+        &SpatialQueryFilter::from_mask([GameLayer::Interaction]),
     ) {
         if interactable_q.contains(hit.entity) {
             commands.entity(hit.entity).insert(InteractionTarget);

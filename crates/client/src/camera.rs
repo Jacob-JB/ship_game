@@ -1,6 +1,6 @@
 use avian3d::prelude::*;
 use bevy::{
-    core_pipeline::bloom::BloomSettings,
+    core_pipeline::bloom::Bloom,
     prelude::*,
     window::{CursorGrabMode, PrimaryWindow},
 };
@@ -22,14 +22,12 @@ pub struct MainCamera;
 fn spawn_main_camera(mut commands: Commands) {
     commands.spawn((
         MainCamera,
-        Camera3dBundle {
-            camera: Camera {
-                hdr: true,
-                ..default()
-            },
+        Camera3d::default(),
+        Camera {
+            hdr: true,
             ..default()
         },
-        BloomSettings::default(),
+        Bloom::default(),
     ));
 }
 
@@ -64,11 +62,11 @@ fn toggle_cursor_lock(
         *locked = !*locked;
 
         if *locked {
-            window.cursor.grab_mode = CursorGrabMode::Locked;
-            window.cursor.visible = false;
+            window.cursor_options.grab_mode = CursorGrabMode::Locked;
+            window.cursor_options.visible = false;
         } else {
-            window.cursor.grab_mode = CursorGrabMode::None;
-            window.cursor.visible = true;
+            window.cursor_options.grab_mode = CursorGrabMode::None;
+            window.cursor_options.visible = true;
         }
     }
 }

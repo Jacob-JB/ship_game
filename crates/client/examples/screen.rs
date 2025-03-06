@@ -7,7 +7,7 @@ use bevy::{
         },
         view::RenderLayers,
     },
-    sprite::{MaterialMesh2dBundle, Mesh2dHandle},
+    sprite::MaterialMesh2dBundle,
 };
 
 fn main() {
@@ -54,12 +54,10 @@ fn setup(
     let image_handle = image_assets.add(image);
 
     commands.spawn((
-        Camera2dBundle {
-            camera: Camera {
-                order: -1,
-                target: RenderTarget::Image(image_handle.clone()),
-                ..default()
-            },
+        Camera2d::default(),
+        Camera {
+            order: -1,
+            target: RenderTarget::Image(image_handle.clone()),
             ..default()
         },
         RenderLayers::from_layers(&[1]),
@@ -69,18 +67,15 @@ fn setup(
     let rect_material = color_material_assets.add(Color::linear_rgb(1., 0., 0.));
 
     commands.spawn((
-        MaterialMesh2dBundle {
-            mesh: Mesh2dHandle(rect_mesh),
-            material: rect_material,
-            ..default()
-        },
+        Mesh2d(rect_mesh),
+        MeshMaterial2d(rect_material),
         RenderLayers::from_layers(&[1]),
     ));
 
-    commands.spawn(Camera3dBundle {
-        transform: Transform::from_xyz(1., 5., 3.).looking_at(Vec3::ZERO, Vec3::Y),
-        ..default()
-    });
+    commands.spawn((
+        Camera3d::default(),
+        Transform::from_xyz(1., 5., 3.).looking_at(Vec3::ZERO, Vec3::Y),
+    ));
 
     let screen_mesh = mesh_assets.add(Rectangle::new(0.5, 0.5));
 
@@ -90,9 +85,5 @@ fn setup(
         ..default()
     });
 
-    commands.spawn(PbrBundle {
-        mesh: screen_mesh,
-        material: screen_material,
-        ..default()
-    });
+    commands.spawn((Mesh3d(screen_mesh), MeshMaterial3d(screen_material)));
 }

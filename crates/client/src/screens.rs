@@ -1,13 +1,13 @@
 use bevy::{
     ecs::system::SystemParam,
+    image::{ImageFilterMode, ImageSampler, ImageSamplerDescriptor},
     prelude::*,
     render::{
         camera::{RenderTarget, ScalingMode},
         render_resource::{
             Extent3d, TextureDescriptor, TextureDimension, TextureFormat, TextureUsages,
         },
-        texture::{ImageFilterMode, ImageSampler, ImageSamplerDescriptor},
-        view::{Layer, RenderLayers},
+        view::RenderLayers,
     },
 };
 
@@ -126,26 +126,24 @@ impl<'w, 's> Screens<'w, 's> {
         let camera_entity = self
             .commands
             .spawn((
-                Camera2dBundle {
-                    camera: Camera {
-                        order: -1,
-                        target: RenderTarget::Image(image.clone()),
-                        clear_color: ClearColorConfig::Custom(Color::BLACK),
-                        ..default()
-                    },
-                    projection: OrthographicProjection {
-                        near: -1000.,
-                        far: 1000.,
-                        scale,
-                        scaling_mode: ScalingMode::Fixed {
-                            width: 1.,
-                            height: 1.,
-                        },
-                        ..default()
-                    },
-                    transform: Transform::from_translation(translation.extend(0.)),
+                Camera2d::default(),
+                Camera {
+                    order: -1,
+                    target: RenderTarget::Image(image.clone()),
+                    clear_color: ClearColorConfig::Custom(Color::BLACK),
                     ..default()
                 },
+                OrthographicProjection {
+                    near: -1000.,
+                    far: 1000.,
+                    scale,
+                    scaling_mode: ScalingMode::Fixed {
+                        width: 1.,
+                        height: 1.,
+                    },
+                    ..OrthographicProjection::default_3d()
+                },
+                Transform::from_translation(translation.extend(0.)),
                 RenderLayers::from_layers(render_layers),
             ))
             .id();
@@ -159,12 +157,9 @@ impl<'w, 's> Screens<'w, 's> {
         });
 
         self.commands.entity(screen_entity).insert((
-            MaterialMeshBundle {
-                mesh: self.screen_assets.screen_mesh.clone(),
-                material,
-                transform,
-                ..default()
-            },
+            Mesh3d(self.screen_assets.screen_mesh.clone()),
+            MeshMaterial3d(material),
+            transform,
             Screen { camera_entity },
         ));
 

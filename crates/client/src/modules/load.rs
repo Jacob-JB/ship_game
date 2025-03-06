@@ -33,24 +33,21 @@ fn load_static_scenes(
         let collider_gltf = assets.load(format!("ship_modules/colliders/{}.gltf", path));
         let mesh_gltf: Handle<Scene> =
             assets.load(format!("ship_modules/meshes/{}.gltf#Scene0", path));
-        let map_image = assets.load(format!("ship_modules/map/{}.png", path));
+        let image = assets.load(format!("ship_modules/map/{}.png", path));
 
         let map_translation =
             translation + Vec2::from_angle(rotation).rotate(map_offset).extend(0.);
 
         let map_entity = commands
             .spawn((
-                SpriteBundle {
-                    sprite: Sprite {
-                        custom_size: Some(map_size),
-                        ..default()
-                    },
-                    texture: map_image,
-                    transform: Transform {
-                        translation: map_translation,
-                        rotation: Quat::from_rotation_y(rotation),
-                        ..default()
-                    },
+                Sprite {
+                    custom_size: Some(map_size),
+                    image,
+                    ..default()
+                },
+                Transform {
+                    translation: map_translation,
+                    rotation: Quat::from_rotation_y(rotation),
                     ..default()
                 },
                 RenderLayers::from_layers(&[ScreenRenderLayer::Map as usize]),
@@ -58,13 +55,13 @@ fn load_static_scenes(
             .id();
 
         commands.entity(scene_entity).insert((
-            TransformBundle::from_transform(Transform {
+            Transform {
                 translation,
                 rotation: Quat::from_rotation_y(rotation),
                 ..default()
-            }),
-            mesh_gltf,
-            VisibilityBundle::default(),
+            },
+            SceneRoot(mesh_gltf),
+            Visibility::default(),
             RigidBody::Static,
             GltfCollider {
                 mesh: collider_gltf,
