@@ -146,7 +146,7 @@ fn update_tank_state(
 
 fn send_tank_toggle_enabled_requests(
     input: Res<ButtonInput<MouseButton>>,
-    tank_q: Query<(Entity, &Tank, &LocalServerEntity)>,
+    tank_q: Query<(&Tank, &LocalServerEntity)>,
     interaction_target_q: Query<(), With<InteractionTarget>>,
     mut messages: QueuedMessageSender<ModuleMessages>,
     message_id: Res<MessageId<RequestToggleTankEnabled>>,
@@ -155,7 +155,7 @@ fn send_tank_toggle_enabled_requests(
         return;
     };
 
-    for (tank_entity, tank, tank_server_entity) in tank_q.iter() {
+    for (tank, tank_server_entity) in tank_q.iter() {
         let true = interaction_target_q.contains(tank.enable_handle_collider_entity) else {
             continue;
         };

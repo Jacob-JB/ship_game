@@ -7,7 +7,6 @@ use bevy::{
         },
         view::RenderLayers,
     },
-    sprite::MaterialMesh2dBundle,
 };
 
 fn main() {
