@@ -14,5 +14,6 @@ pub fn build(app: &mut App) {
 
 /// Marker type for the message queue used for element updates.
 ///
-/// They share a message queue for simplicity.
+/// Used by all elements for non latency/bandwidth critical updates,
+/// such as spawning and despawning, doors opening and closing, etc
 pub struct ElementUpdateMessageQueue;

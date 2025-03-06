@@ -1,6 +1,7 @@
 use bevy::{
     log::{Level, LogPlugin},
     prelude::*,
+    window::{PresentMode, WindowTheme},
 };
 use common::{mesh_colliders::GltfColliderPlugin, state::JoinRequest};
 use state::ConnectToServer;
@@ -27,6 +28,15 @@ fn main() {
             })
             .set(AssetPlugin {
                 file_path: "../../assets".into(),
+                ..default()
+            })
+            .set(WindowPlugin {
+                primary_window: Some(Window {
+                    title: "Ship Game".into(),
+                    present_mode: PresentMode::Mailbox,
+                    window_theme: Some(WindowTheme::Dark),
+                    ..default()
+                }),
                 ..default()
             }),
     );

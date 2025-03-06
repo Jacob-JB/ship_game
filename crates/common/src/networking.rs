@@ -18,9 +18,10 @@ pub fn server_client_protocol() -> ProtocolBuilder<ServerClientMessages> {
     protocol.add_message::<crate::physics::TimeSample>();
     protocol.add_message::<crate::player::NewPlayer>();
     protocol.add_message::<crate::modules::LoadModule>();
-    protocol.add_message::<crate::elements::NewShipMap>();
-    protocol.add_message::<crate::elements::ShipMapPositionUpdate>();
-    protocol.add_message::<crate::elements::NewTank>();
+    protocol.add_message::<crate::elements::ship_map::NewShipMap>();
+    protocol.add_message::<crate::elements::ship_map::ShipMapPositionUpdate>();
+    protocol.add_message::<crate::elements::tank::NewTank>();
+    protocol.add_message::<crate::elements::tank::UpdateTankState>();
 
     protocol
 }
@@ -30,7 +31,8 @@ pub fn client_server_protocol() -> ProtocolBuilder<ClientServerMessages> {
 
     protocol.add_message::<crate::state::JoinRequest>();
     protocol.add_message::<crate::player::ClientPlayerUpdate>();
-    protocol.add_message::<crate::elements::ShipMapMoveRequest>();
+    protocol.add_message::<crate::elements::ship_map::ShipMapMoveRequest>();
+    protocol.add_message::<crate::elements::tank::RequestToggleTankEnabled>();
 
     protocol
 }

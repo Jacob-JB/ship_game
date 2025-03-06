@@ -7,7 +7,7 @@ use bevy::{
         render_resource::{
             Extent3d, TextureDescriptor, TextureDimension, TextureFormat, TextureUsages,
         },
-        view::RenderLayers,
+        view::{Layer, RenderLayers},
     },
 };
 

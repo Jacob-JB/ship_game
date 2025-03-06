@@ -1,5 +1,7 @@
 use bevy::prelude::*;
-use common::elements::{NewShipMap, ShipMapMoveRequest, ShipMapPosition, ShipMapPositionUpdate};
+use common::elements::ship_map::{
+    NewShipMap, ShipMapMoveRequest, ShipMapPosition, ShipMapPositionUpdate,
+};
 use nevy::prelude::ReceivedMessages;
 
 use crate::{
@@ -110,7 +112,7 @@ fn move_ship_maps(
     for (client_entity, mut messages, has_player) in client_q.iter_mut() {
         for ShipMapMoveRequest { entity, delta } in messages.drain() {
             let true = has_player else {
-                error!(
+                warn!(
                     "client {} sent a ship map move request when they weren't a player",
                     client_entity
                 );

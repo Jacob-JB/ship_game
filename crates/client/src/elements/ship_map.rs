@@ -3,7 +3,7 @@ use std::time::Duration;
 use avian3d::prelude::*;
 use bevy::prelude::*;
 use common::{
-    elements::{NewShipMap, ShipMapMoveRequest, ShipMapPositionUpdate},
+    elements::ship_map::{NewShipMap, ShipMapMoveRequest, ShipMapPositionUpdate},
     GameLayer,
 };
 
@@ -25,7 +25,7 @@ pub fn build(app: &mut App) {
         (
             spawn_screens,
             press_ship_map_keys,
-            update_ship_map_keys,
+            move_ship_map_keys,
             move_ship_map,
             update_ship_maps,
             move_screen_camera,
@@ -100,14 +100,7 @@ fn spawn_screens(
         );
 
         let key_bundle = (
-<<<<<<< HEAD
-            SceneBundle {
-                scene: screen_assets.0.clone(),
-                ..default()
-            },
-=======
-            SceneRoot(screen_assets.key_model.clone()),
->>>>>>> 4af114e404a7981aa4814987c43aacaa5802be7c
+            SceneRoot(screen_assets.0.clone()),
             Position::default(),
             Collider::cuboid(0.1, 0.05, 0.1),
             CollisionLayers::new([GameLayer::Interaction], 0),
@@ -222,8 +215,8 @@ fn press_ship_map_keys(
     }
 }
 
-fn update_ship_map_keys(
-    mut key_q: Query<(Entity, &ShipMapKey, &mut Transform), Changed<ShipMapKey>>,
+fn move_ship_map_keys(
+    mut key_q: Query<(Entity, &ShipMapKey, &mut Transform)>,
     map_q: Query<&GlobalTransform, Without<ShipMapKey>>,
 ) {
     for (key_entity, key, mut key_transform) in key_q.iter_mut() {
