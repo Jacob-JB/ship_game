@@ -13,7 +13,7 @@ pub const RESET_FLOOR: f32 = -50.0;
 pub fn build(app: &mut App) {
     controller::build_player_controller(app);
 
-    app.insert_resource(MouseSensitivity(Vec2::splat(0.005)));
+    app.insert_resource(MouseSensitivity(Vec2::splat(0.002)));
 
     app.add_systems(
         Update,

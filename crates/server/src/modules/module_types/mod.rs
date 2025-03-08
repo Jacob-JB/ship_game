@@ -3,6 +3,7 @@ use bevy::{ecs::system::EntityCommands, prelude::*};
 use super::grid::{ShipModuleGrid, ShipModuleGridSpaces, ShipModuleTransform};
 
 pub mod command_module;
+pub mod oxygen_storage_a;
 
 /// System set where ship module initialization
 /// systems should be placed during [Update].
@@ -17,6 +18,7 @@ pub fn build(app: &mut App) {
     app.init_resource::<ShipModuleTypes>();
 
     command_module::build(app);
+    oxygen_storage_a::build(app);
 
     app.add_systems(Update, spawn_ship_modules.before(InitShipModules));
 }
