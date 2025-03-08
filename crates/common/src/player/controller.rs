@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::GameLayer;
 
-const PLAYER_ACCELERATION: f32 = 30.;
+const PLAYER_ACCELERATION: f32 = 75.;
 const MAX_INTEGRATE_ITERATIONS: usize = 20;
 const PLAYER_COLLISION_MARGIN: f32 = 0.0005;
 

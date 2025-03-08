@@ -25,7 +25,7 @@ pub fn build(app: &mut App) {
         (
             spawn_screens,
             press_ship_map_keys,
-            move_ship_map_keys,
+            update_ship_map_keys,
             move_ship_map,
             update_ship_maps,
             move_screen_camera,
@@ -215,8 +215,8 @@ fn press_ship_map_keys(
     }
 }
 
-fn move_ship_map_keys(
-    mut key_q: Query<(Entity, &ShipMapKey, &mut Transform)>,
+fn update_ship_map_keys(
+    mut key_q: Query<(Entity, &ShipMapKey, &mut Transform), With<ShipMapKey>>,
     map_q: Query<&GlobalTransform, Without<ShipMapKey>>,
 ) {
     for (key_entity, key, mut key_transform) in key_q.iter_mut() {

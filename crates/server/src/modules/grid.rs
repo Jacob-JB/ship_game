@@ -270,7 +270,7 @@ impl ShipModuleGridSpaces {
 macro_rules! grid_spaces {
     [$(($x:expr, $y:expr)),* $(,)?] => {
         crate::modules::grid::ShipModuleGridSpaces {
-            spaces: vec![$(IVec2::new($x, $y)),*],
+            spaces: vec![$(bevy::math::IVec2::new($x, $y)),*],
         }
     };
 }

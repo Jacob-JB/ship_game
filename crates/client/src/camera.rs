@@ -28,6 +28,10 @@ fn spawn_main_camera(mut commands: Commands) {
             ..default()
         },
         Bloom::default(),
+        Projection::Perspective(PerspectiveProjection {
+            fov: 75.0f32.to_radians(),
+            ..default()
+        }),
     ));
 }
 
