@@ -1,9 +1,6 @@
 use avian3d::prelude::*;
 use bevy::prelude::*;
-use common::{
-    elements::tank::{NewTank, RequestToggleTankEnabled, UpdateTankState},
-    GameLayer,
-};
+use common::{elements::tank::*, GameLayer};
 
 use crate::{
     entity_map::{LocalServerEntity, ServerEntityMap, ServerEntityMapper},
@@ -14,7 +11,7 @@ use crate::{
 
 use super::ModuleMessages;
 
-const SCREEN_IMAGE_SIZE: UVec2 = UVec2::new(24, 48);
+const TANK_SCREEN_RESOLUTION: UVec2 = UVec2::new(48, 96);
 
 pub fn build(app: &mut App) {
     app.init_resource::<ValveHandleScene>();
@@ -26,6 +23,7 @@ pub fn build(app: &mut App) {
             update_tank_state,
             send_tank_toggle_enabled_requests,
             move_tank_handles,
+            receive_tank_percentage_updates,
         ),
     );
 }
@@ -45,6 +43,8 @@ impl FromWorld for ValveHandleScene {
 
 #[derive(Component)]
 pub struct Tank {
+    screen_camera_entity: Entity,
+    level_text_entity: Entity,
     enable_handle_mesh_entity: Entity,
     enable_handle_collider_entity: Entity,
     enabled: bool,
@@ -78,9 +78,9 @@ fn spawn_tanks(
             ..default()
         };
 
-        screens.create_screen(
+        let screen_camera_entity = screens.create_screen(
             tank_entity,
-            SCREEN_IMAGE_SIZE,
+            TANK_SCREEN_RESOLUTION,
             Transform {
                 scale: Vec3::new(0.5, 1., 1.),
                 ..tank_transform
@@ -89,6 +89,22 @@ fn spawn_tanks(
             default(),
             &[render_layer],
         );
+
+        let level_text_entity = commands
+            .spawn((
+                Text::default(),
+                TextFont {
+                    font_size: 16.,
+                    ..default()
+                },
+                Node {
+                    margin: UiRect::all(Val::Px(1.)),
+                    justify_self: JustifySelf::Center,
+                    ..default()
+                },
+                TargetCamera(screen_camera_entity),
+            ))
+            .id();
 
         let enable_handle_mesh_entity = commands
             .spawn((
@@ -114,6 +130,8 @@ fn spawn_tanks(
             .id();
 
         commands.entity(tank_entity).insert(Tank {
+            screen_camera_entity,
+            level_text_entity,
             enable_handle_mesh_entity,
             enable_handle_collider_entity,
             enabled: state.enabled,
@@ -201,5 +219,38 @@ fn move_tank_handles(
                 handle_angle,
             ),
         });
+    }
+}
+
+fn receive_tank_percentage_updates(
+    mut messages: MessageReceiver<UpdateTankPercentage>,
+    map: Res<ServerEntityMap>,
+    tank_q: Query<&Tank>,
+    mut text_q: Query<&mut Text>,
+) {
+    for UpdateTankPercentage { entity, percentage } in messages.drain() {
+        info!("Got percentage update");
+
+        let Some(tank_entity) = map.get_client_entity(entity) else {
+            // percentage updates are unordered, it's ok if the tank doesn't exist
+            continue;
+        };
+
+        let Ok(tank) = tank_q.get(tank_entity) else {
+            error!("Couldn't query tank {}", tank_entity);
+            continue;
+        };
+
+        let Ok(mut level_text) = text_q.get_mut(tank.level_text_entity) else {
+            error!(
+                "Couldn't query tank {}'s level text {}",
+                tank_entity, tank.level_text_entity
+            );
+            continue;
+        };
+
+        level_text.0 = format!("Tank Level {:.0}%", percentage * 100.);
+
+        info!("Updated tank percentage {}", percentage);
     }
 }

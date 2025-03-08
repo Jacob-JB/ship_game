@@ -22,6 +22,7 @@ pub fn server_client_protocol() -> ProtocolBuilder<ServerClientMessages> {
     protocol.add_message::<crate::elements::ship_map::ShipMapPositionUpdate>();
     protocol.add_message::<crate::elements::tank::NewTank>();
     protocol.add_message::<crate::elements::tank::UpdateTankState>();
+    protocol.add_message::<crate::elements::tank::UpdateTankPercentage>();
 
     protocol
 }

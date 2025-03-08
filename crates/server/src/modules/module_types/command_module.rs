@@ -2,9 +2,13 @@ use bevy::prelude::*;
 use common::mesh_colliders::GltfCollider;
 
 use crate::{
-    elements::{ship_map::ShipMapBundle, tank::TankBundle},
+    elements::{ship_map::ShipMapBundle, tank::Tank},
     grid_spaces,
-    modules::{grid::ShipModuleTransform, networking::ModuleAssets},
+    modules::{
+        atmosphere::{ModuleAtmosphere, TankAtmosphere, Vent},
+        grid::ShipModuleTransform,
+        networking::ModuleAssets,
+    },
 };
 
 use super::{add_ship_module_type, InitShipModules, ShipModuleDescription, SpawnShipModule};
@@ -61,6 +65,12 @@ fn init_command_modules(
                 map_size: Vec2::new(3., 3.),
             },
             GltfCollider { mesh },
+            Vent { open: true },
+            ModuleAtmosphere {
+                volume: 9.,
+                level: 9.,
+                breached: false,
+            },
         ));
 
         commands
@@ -72,11 +82,16 @@ fn init_command_modules(
             .set_parent(module_entity);
 
         commands
-            .spawn(TankBundle {
-                transform: Transform::from_xyz(-2., 1.8, 2.75)
+            .spawn((
+                Tank,
+                TankAtmosphere {
+                    volume: 30.,
+                    level: 30.,
+                    enabled: true,
+                },
+                Transform::from_xyz(-2., 1.8, 2.75)
                     .with_rotation(Quat::from_rotation_y(std::f32::consts::PI)),
-                ..default()
-            })
+            ))
             .set_parent(module_entity);
     }
 }

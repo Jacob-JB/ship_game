@@ -1,13 +1,19 @@
+use std::time::Duration;
+
 use bevy::prelude::*;
-use common::elements::tank::{NewTank, RequestToggleTankEnabled, TankState, UpdateTankState};
+use common::elements::tank::{
+    NewTank, RequestToggleTankEnabled, TankState, UpdateTankPercentage, UpdateTankState,
+};
 use nevy::prelude::ReceivedMessages;
 
 use crate::modules::module_types::InitShipModules;
 use crate::networking::prelude::*;
 use crate::player::networking::ConnectedPlayer;
-use crate::{modules::atmosphere::AtmosphereTank, state::ReceiveGameUpdates};
+use crate::{modules::atmosphere::TankAtmosphere, state::ReceiveGameUpdates};
 
 use super::ElementUpdateMessageQueue;
+
+const TANK_PERCENTAGE_UPDATE_INTERVAL: Duration = Duration::from_millis(200);
 
 pub fn build(app: &mut App) {
     app.add_event::<SendTankStateUpdate>();
@@ -18,6 +24,7 @@ pub fn build(app: &mut App) {
             (replicate_new_tanks, replicate_existing_tanks).before(InitShipModules),
             updated_changed_tank_state,
             receive_tank_toggle_enabled_requests,
+            send_tank_percentage_updates,
         ),
     );
 }
@@ -27,15 +34,21 @@ struct SendTankStateUpdate {
     tank_entity: Entity,
 }
 
-#[derive(Bundle, Default)]
-pub struct TankBundle {
-    pub atmosphere_tank: AtmosphereTank,
-    pub transform: Transform,
-    pub global_transform: GlobalTransform,
-}
+/// Marker component for tank elements.
+#[derive(Component, Default)]
+#[require(TankAtmosphere, Transform)]
+pub struct Tank;
+
+// #[derive(Bundle, Default)]
+// pub struct TankBundle {
+//     pub tank: Tank,
+//     pub atmosphere_tank: TankAtmosphere,
+//     pub transform: Transform,
+//     pub global_transform: GlobalTransform,
+// }
 
 fn replicate_new_tanks(
-    tank_q: Query<(Entity, &AtmosphereTank, &GlobalTransform), Added<AtmosphereTank>>,
+    tank_q: Query<(Entity, &TankAtmosphere, &GlobalTransform), Added<TankAtmosphere>>,
     client_q: Query<Entity, With<ReceiveGameUpdates>>,
     mut messages: QueuedMessageSender<ElementUpdateMessageQueue>,
     message_id: Res<MessageId<NewTank>>,
@@ -59,7 +72,7 @@ fn replicate_new_tanks(
 }
 
 fn replicate_existing_tanks(
-    tank_q: Query<(Entity, &AtmosphereTank, &GlobalTransform)>,
+    tank_q: Query<(Entity, &TankAtmosphere, &GlobalTransform)>,
     client_q: Query<Entity, Added<ReceiveGameUpdates>>,
     mut messages: QueuedMessageSender<ElementUpdateMessageQueue>,
     message_id: Res<MessageId<NewTank>>,
@@ -84,7 +97,7 @@ fn replicate_existing_tanks(
 
 fn updated_changed_tank_state(
     mut send_update_r: EventReader<SendTankStateUpdate>,
-    tank_q: Query<&AtmosphereTank>,
+    tank_q: Query<&TankAtmosphere>,
     client_q: Query<Entity, With<ReceiveGameUpdates>>,
     mut messages: QueuedMessageSender<ElementUpdateMessageQueue>,
     message_id: Res<MessageId<UpdateTankState>>,
@@ -116,7 +129,7 @@ fn receive_tank_toggle_enabled_requests(
         &mut ReceivedMessages<RequestToggleTankEnabled>,
         Has<ConnectedPlayer>,
     )>,
-    mut tank_q: Query<&mut AtmosphereTank>,
+    mut tank_q: Query<&mut TankAtmosphere>,
     mut send_update_w: EventWriter<SendTankStateUpdate>,
 ) {
     for (client_entity, mut messages, has_player) in client_q.iter_mut() {
@@ -141,6 +154,31 @@ fn receive_tank_toggle_enabled_requests(
 
             tank.enabled = !tank.enabled;
             send_update_w.send(SendTankStateUpdate { tank_entity });
+        }
+    }
+}
+
+fn send_tank_percentage_updates(
+    tank_q: Query<(Entity, &TankAtmosphere), With<Tank>>,
+    client_q: Query<Entity, With<ReceiveGameUpdates>>,
+    mut message_sender: MessageSender,
+    message_id: Res<MessageId<UpdateTankPercentage>>,
+    time: Res<Time>,
+    mut last_update: Local<Duration>,
+) {
+    if time.elapsed() - *last_update > TANK_PERCENTAGE_UPDATE_INTERVAL {
+        *last_update = time.elapsed();
+
+        for (tank_entity, tank) in tank_q.iter() {
+            let message = UpdateTankPercentage {
+                entity: tank_entity.into(),
+                percentage: tank.level / tank.volume,
+            };
+
+            for client_entity in client_q.iter() {
+                // send unreliably
+                message_sender.send(*message_id, client_entity, &message);
+            }
         }
     }
 }

@@ -30,3 +30,10 @@ pub struct UpdateTankState {
 pub struct RequestToggleTankEnabled {
     pub entity: ServerEntity,
 }
+
+/// Message from server to client to update the percentage filled level of a tank
+#[derive(Serialize, Deserialize)]
+pub struct UpdateTankPercentage {
+    pub entity: ServerEntity,
+    pub percentage: f32,
+}

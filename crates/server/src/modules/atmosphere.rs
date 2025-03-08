@@ -10,11 +10,36 @@ pub fn build(app: &mut App) {
     );
 }
 
+#[derive(Component, Default)]
+pub struct TankAtmosphere {
+    /// maximum `level` of the tank
+    pub volume: f32,
+    /// how many grid atmospheres are in the tank
+    pub level: f32,
+    /// whether the tank is being used to fill rooms
+    pub enabled: bool,
+}
+
 #[derive(Component)]
 pub struct ModuleAtmosphere {
     pub volume: f32,
     pub level: f32,
     pub breached: bool,
+}
+
+/// Vent in a ship module.
+///
+/// Insert onto ship modules that contain vents.
+/// If a ship module doesn't contain a vent it can only be filled
+/// from other modules.
+#[derive(Component)]
+pub struct Vent {
+    pub open: bool,
+}
+
+#[derive(Resource)]
+pub struct VentFillRate {
+    pub rate: f32,
 }
 
 #[derive(Resource)]
@@ -35,36 +60,16 @@ fn drain_breached_atmospheres(
     }
 }
 
-/// Vent in a ship module.
-#[derive(Component)]
-pub struct Vent {
-    pub open: bool,
-}
-
-#[derive(Resource)]
-pub struct VentFillRate {
-    pub rate: f32,
-}
-
-#[derive(Component, Default)]
-pub struct AtmosphereTank {
-    /// maximum `level` of the tank
-    pub volume: f32,
-    /// how many grid atmospheres are in the tank
-    pub level: f32,
-    /// whether the tank is being used to fill rooms
-    pub enabled: bool,
-}
-
 fn fill_atmospheres(
     mut module_q: Query<(&Vent, &mut ModuleAtmosphere)>,
     fill_rate: Res<VentFillRate>,
-    mut tank_q: Query<&mut AtmosphereTank>,
+    mut tank_q: Query<&mut TankAtmosphere>,
     time: Res<Time>,
 ) {
-    let vent_flow = |atmosphere: &ModuleAtmosphere| {
-        let difference = (atmosphere.level - atmosphere.volume).max(0.);
-        difference.min(difference * fill_rate.rate * time.delta_secs())
+    let compute_module_flow = |atmosphere: &ModuleAtmosphere| {
+        let difference = (atmosphere.volume - atmosphere.level).max(0.);
+        let max_flow = fill_rate.rate * atmosphere.volume * time.delta_secs();
+        difference.min(max_flow)
     };
 
     let available_atmosphere = tank_q
@@ -79,14 +84,22 @@ fn fill_atmospheres(
                 return None;
             }
 
-            Some(vent_flow(atmosphere))
+            Some(compute_module_flow(atmosphere))
         })
         .sum::<f32>();
+
+    if required_atmosphere == 0.0 {
+        // no atmosphere required, return to avoid NaN values.
+        return;
+    }
 
     // percent of required atmosphere that can be delivered
     let fill_percent = (available_atmosphere / required_atmosphere).min(1.);
     // percent of atmosphere tanks to be drained
     let drain_percent = (required_atmosphere * fill_percent) / available_atmosphere;
+
+    // dbg!(fill_percent);
+    // dbg!(drain_percent);
 
     for mut tank in tank_q.iter_mut() {
         tank.level -= tank.level * drain_percent;
@@ -97,6 +110,6 @@ fn fill_atmospheres(
             continue;
         }
 
-        atmosphere.level += vent_flow(atmosphere.as_ref()) * fill_percent;
+        atmosphere.level += compute_module_flow(atmosphere.as_ref()) * fill_percent;
     }
 }
