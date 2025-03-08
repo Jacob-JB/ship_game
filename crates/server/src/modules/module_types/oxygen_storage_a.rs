@@ -2,8 +2,9 @@ use bevy::prelude::*;
 use common::mesh_colliders::GltfCollider;
 
 use crate::{
+    elements::tank::Tank,
     grid_spaces,
-    modules::{grid::ShipModuleTransform, networking::ModuleAssets},
+    modules::{atmosphere::TankAtmosphere, grid::ShipModuleTransform, networking::ModuleAssets},
 };
 
 use super::{add_ship_module_type, InitShipModules, ShipModuleDescription, SpawnShipModule};
@@ -54,5 +55,18 @@ fn init_oxygen_storage_a_modules(
             },
             GltfCollider { mesh },
         ));
+
+        commands
+            .spawn((
+                Tank,
+                TankAtmosphere {
+                    volume: 60.,
+                    level: 60.,
+                    enabled: true,
+                },
+                Transform::from_xyz(-0.9, 1.8, 0.)
+                    .with_rotation(Quat::from_rotation_y(std::f32::consts::FRAC_PI_2)),
+            ))
+            .set_parent(module_entity);
     }
 }

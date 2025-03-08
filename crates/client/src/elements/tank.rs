@@ -229,8 +229,6 @@ fn receive_tank_percentage_updates(
     mut text_q: Query<&mut Text>,
 ) {
     for UpdateTankPercentage { entity, percentage } in messages.drain() {
-        info!("Got percentage update");
-
         let Some(tank_entity) = map.get_client_entity(entity) else {
             // percentage updates are unordered, it's ok if the tank doesn't exist
             continue;
@@ -250,7 +248,5 @@ fn receive_tank_percentage_updates(
         };
 
         level_text.0 = format!("Tank Level {:.0}%", percentage * 100.);
-
-        info!("Updated tank percentage {}", percentage);
     }
 }

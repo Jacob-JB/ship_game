@@ -1,5 +1,5 @@
 use bevy::{
-    log::{Level, LogPlugin},
+    log::{Level, LogPlugin, DEFAULT_FILTER},
     prelude::*,
     window::{PresentMode, WindowTheme},
 };
@@ -15,6 +15,7 @@ pub mod physics;
 pub mod player;
 pub mod screens;
 pub mod state;
+pub mod ui;
 
 fn main() {
     let mut app = App::new();
@@ -23,7 +24,8 @@ fn main() {
         DefaultPlugins
             .set(LogPlugin {
                 level: Level::DEBUG,
-                filter: "wgpu=error,naga=warn,bevy_render=warn,bevy_app=warn".into(),
+                filter: DEFAULT_FILTER.to_string()
+                    + ",bevy_render=warn,bevy_app=warn,cosmic_text::buffer=warn",
                 ..default()
             })
             .set(AssetPlugin {
@@ -52,6 +54,7 @@ fn main() {
     modules::build(&mut app);
     screens::build(&mut app);
     elements::build(&mut app);
+    ui::build(&mut app);
 
     app.insert_resource(AmbientLight {
         brightness: 100.0,
