@@ -17,6 +17,7 @@ pub fn server_client_protocol() -> ProtocolBuilder<ServerClientMessages> {
     protocol.add_message::<crate::physics::PhysicsSnapshot>();
     protocol.add_message::<crate::physics::TimeSample>();
     protocol.add_message::<crate::player::NewPlayer>();
+    protocol.add_message::<crate::player::vitality::UpdatePlayerVitality>();
     protocol.add_message::<crate::modules::LoadModule>();
     protocol.add_message::<crate::elements::ship_map::NewShipMap>();
     protocol.add_message::<crate::elements::ship_map::ShipMapPositionUpdate>();

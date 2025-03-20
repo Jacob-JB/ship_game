@@ -6,6 +6,7 @@ use serde::{Deserialize, Serialize};
 use crate::ServerEntity;
 
 pub mod controller;
+pub mod vitality;
 
 /// Message from server to client to initialize a new player.
 #[derive(Serialize, Deserialize)]

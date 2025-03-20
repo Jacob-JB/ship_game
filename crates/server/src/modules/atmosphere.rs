@@ -93,13 +93,15 @@ fn fill_atmospheres(
         return;
     }
 
+    if available_atmosphere == 0.0 {
+        // no atmosphere available, return to avoid NaN values.
+        return;
+    }
+
     // percent of required atmosphere that can be delivered
     let fill_percent = (available_atmosphere / required_atmosphere).min(1.);
     // percent of atmosphere tanks to be drained
     let drain_percent = (required_atmosphere * fill_percent) / available_atmosphere;
-
-    // dbg!(fill_percent);
-    // dbg!(drain_percent);
 
     for mut tank in tank_q.iter_mut() {
         tank.level -= tank.level * drain_percent;

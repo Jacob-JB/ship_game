@@ -1,7 +1,7 @@
 use avian3d::prelude::*;
 use bevy::prelude::*;
 use common::{
-    player::{controller::PlayerInput, *},
+    player::{controller::PlayerInput, vitality::PlayerVitality, *},
     GameLayer,
 };
 
@@ -10,11 +10,13 @@ use crate::physics::playout::SnapshotInterpolation;
 pub mod controller;
 pub mod interaction;
 pub mod networking;
+pub mod vitality;
 
 pub fn build(app: &mut App) {
     networking::build(app);
     controller::build(app);
     interaction::build(app);
+    vitality::build(app);
 }
 
 /// Marker component for a player on the client
@@ -46,9 +48,11 @@ pub struct LocalPlayerBundle {
     player_input: PlayerInput,
     position: Position,
     rotation: Rotation,
+    transform: Transform,
     linear_velocity: LinearVelocity,
     collider: Collider,
     collision_layers: CollisionLayers,
+    player_health: PlayerVitality,
 }
 
 impl PlayerBundle {
@@ -72,9 +76,11 @@ impl LocalPlayerBundle {
             player_input: PlayerInput::default(),
             position: Position(new_local_player.position),
             rotation: Rotation::default(),
+            transform: Transform::default(),
             linear_velocity: LinearVelocity::default(),
             collider: player_collider(),
             collision_layers: CollisionLayers::new([GameLayer::Players], 0),
+            player_health: PlayerVitality::default(),
         }
     }
 }

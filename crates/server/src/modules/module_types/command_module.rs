@@ -87,7 +87,7 @@ fn init_command_modules(
                 TankAtmosphere {
                     volume: 30.,
                     level: 30.,
-                    enabled: true,
+                    enabled: false,
                 },
                 Transform::from_xyz(-2., 1.8, 2.75)
                     .with_rotation(Quat::from_rotation_y(std::f32::consts::PI)),
