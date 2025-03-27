@@ -113,7 +113,7 @@ impl<'w, 's> Screens<'w, 's> {
             },
             sampler: ImageSampler::Descriptor(ImageSamplerDescriptor {
                 mag_filter: ImageFilterMode::Nearest,
-                min_filter: ImageFilterMode::Nearest,
+                min_filter: ImageFilterMode::Linear,
                 ..default()
             }),
             ..default()

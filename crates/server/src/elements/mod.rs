@@ -2,6 +2,7 @@ use bevy::prelude::*;
 
 use crate::networking::prelude::*;
 
+pub mod room_vent;
 pub mod ship_map;
 pub mod tank;
 

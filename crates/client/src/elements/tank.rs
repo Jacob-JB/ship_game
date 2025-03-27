@@ -1,5 +1,8 @@
 use avian3d::prelude::*;
-use bevy::prelude::*;
+use bevy::{
+    color::palettes::css::{GREEN, RED},
+    prelude::*,
+};
 use common::{elements::tank::*, GameLayer};
 
 use crate::{
@@ -11,7 +14,7 @@ use crate::{
 
 use super::ModuleMessages;
 
-const TANK_SCREEN_RESOLUTION: UVec2 = UVec2::new(48, 96);
+const TANK_SCREEN_RESOLUTION: UVec2 = UVec2::new(48, 48);
 
 pub fn build(app: &mut App) {
     app.init_resource::<ValveHandleScene>();
@@ -23,6 +26,7 @@ pub fn build(app: &mut App) {
             update_tank_state,
             send_tank_toggle_enabled_requests,
             move_tank_handles,
+            update_enabled_text,
             receive_tank_percentage_updates,
         ),
     );
@@ -44,14 +48,16 @@ impl FromWorld for ValveHandleScene {
 #[derive(Component)]
 pub struct Tank {
     screen_camera_entity: Entity,
+    tank_ui_root: Entity,
     level_text_entity: Entity,
+    enabled_text_entity: Entity,
     enable_handle_mesh_entity: Entity,
     enable_handle_collider_entity: Entity,
     enabled: bool,
 }
 
-const ENABLE_HANDLE_MESH_OFFSET: Vec3 = Vec3::new(0., -0.35, 0.);
-const ENABLE_HANDLE_COLLIDER_OFFSET: Vec3 = Vec3::new(0., -0.35, 0.025);
+const ENABLE_HANDLE_MESH_OFFSET: Vec3 = Vec3::new(0., -0.2, 0.);
+const ENABLE_HANDLE_COLLIDER_OFFSET: Vec3 = Vec3::new(0., -0.2, 0.025);
 
 fn spawn_tanks(
     mut commands: Commands,
@@ -78,17 +84,33 @@ fn spawn_tanks(
             ..default()
         };
 
+        let screen_entity = commands
+            .spawn(GlobalTransform::default())
+            .set_parent(tank_entity)
+            .id();
+
         let screen_camera_entity = screens.create_screen(
-            tank_entity,
+            screen_entity,
             TANK_SCREEN_RESOLUTION,
-            Transform {
-                scale: Vec3::new(0.5, 1., 1.),
-                ..tank_transform
-            },
+            Transform::from_scale(Vec3::new(0.5, 0.5, 1.)),
             1.,
             default(),
             &[render_layer],
         );
+
+        let tank_ui_root = commands
+            .spawn((
+                Node {
+                    width: Val::Percent(100.),
+                    height: Val::Percent(100.),
+                    flex_direction: FlexDirection::Column,
+                    align_items: AlignItems::Center,
+                    justify_content: JustifyContent::Center,
+                    ..default()
+                },
+                TargetCamera(screen_camera_entity),
+            ))
+            .id();
 
         let level_text_entity = commands
             .spawn((
@@ -99,11 +121,27 @@ fn spawn_tanks(
                 },
                 Node {
                     margin: UiRect::all(Val::Px(1.)),
-                    justify_self: JustifySelf::Center,
                     ..default()
                 },
                 TargetCamera(screen_camera_entity),
             ))
+            .set_parent(tank_ui_root)
+            .id();
+
+        let enabled_text_entity = commands
+            .spawn((
+                Text::default(),
+                TextFont {
+                    font_size: 16.,
+                    ..default()
+                },
+                TextColor(GREEN.into()),
+                Node {
+                    margin: UiRect::all(Val::Px(1.)),
+                    ..default()
+                },
+            ))
+            .set_parent(tank_ui_root)
             .id();
 
         let enable_handle_mesh_entity = commands
@@ -129,13 +167,19 @@ fn spawn_tanks(
             ))
             .id();
 
-        commands.entity(tank_entity).insert(Tank {
-            screen_camera_entity,
-            level_text_entity,
-            enable_handle_mesh_entity,
-            enable_handle_collider_entity,
-            enabled: state.enabled,
-        });
+        commands.entity(tank_entity).insert((
+            Tank {
+                screen_camera_entity,
+                tank_ui_root,
+                level_text_entity,
+                enabled_text_entity,
+                enable_handle_mesh_entity,
+                enable_handle_collider_entity,
+                enabled: state.enabled,
+            },
+            tank_transform,
+            GlobalTransform::default(),
+        ));
     }
 }
 
@@ -222,6 +266,34 @@ fn move_tank_handles(
     }
 }
 
+fn update_enabled_text(
+    tank_q: Query<(Entity, &Tank)>,
+    mut text_q: Query<(&mut Text, &mut TextColor)>,
+) {
+    for (tank_entity, tank) in tank_q.iter() {
+        let Ok((mut enabled_text, mut enabled_color)) = text_q.get_mut(tank.enabled_text_entity)
+        else {
+            error!(
+                "Couldn't query tank {}'s enabled text {}",
+                tank_entity, tank.enabled_text_entity
+            );
+            continue;
+        };
+
+        enabled_text.0 = if tank.enabled {
+            "Open".to_string()
+        } else {
+            "Shut".to_string()
+        };
+
+        enabled_color.0 = if tank.enabled {
+            GREEN.into()
+        } else {
+            RED.into()
+        };
+    }
+}
+
 fn receive_tank_percentage_updates(
     mut messages: MessageReceiver<UpdateTankPercentage>,
     map: Res<ServerEntityMap>,
@@ -247,6 +319,6 @@ fn receive_tank_percentage_updates(
             continue;
         };
 
-        level_text.0 = format!("Tank Level {:.0}%", percentage * 100.);
+        level_text.0 = format!("{:.0}%", percentage * 100.);
     }
 }

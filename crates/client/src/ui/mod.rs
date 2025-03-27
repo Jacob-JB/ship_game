@@ -1,4 +1,7 @@
 use bevy::{color::palettes::css::WHITE, prelude::*};
+use vitality::VitalityUi;
+
+pub mod vitality;
 
 pub fn build(app: &mut App) {
     app.add_systems(Startup, create_ui);
@@ -7,8 +10,7 @@ pub fn build(app: &mut App) {
 /// Contains the entities of ui nodes created on startup
 #[derive(Resource)]
 pub struct UiElements {
-    pub oxygen_level_entity: Entity,
-    pub health_level_entity: Entity,
+    pub vitality: VitalityUi,
 }
 
 fn create_ui(mut commands: Commands) {
@@ -35,27 +37,7 @@ fn create_ui(mut commands: Commands) {
         .set_parent(root_node_entity)
         .id();
 
-    // ui node in the bottom left corner containing player health stats stacked vertically
-    let player_health_items = commands
-        .spawn(Node {
-            flex_direction: FlexDirection::Column,
-            ..default()
-        })
-        .set_parent(lower_left_quad_entity)
-        .id();
+    let vitality = VitalityUi::new(&mut commands, lower_left_quad_entity);
 
-    let oxygen_level_entity = commands
-        .spawn(Text::new("Oxygen Level"))
-        .set_parent(player_health_items)
-        .id();
-
-    let health_level_entity = commands
-        .spawn(Text::new("Health Level"))
-        .set_parent(player_health_items)
-        .id();
-
-    commands.insert_resource(UiElements {
-        oxygen_level_entity,
-        health_level_entity,
-    });
+    commands.insert_resource(UiElements { vitality });
 }

@@ -25,27 +25,31 @@ fn receive_player_vitality_updates(
 fn update_health_ui(
     local_player_q: Query<&PlayerVitality, With<LocalPlayer>>,
     ui_elements: Res<UiElements>,
-    mut text_q: Query<(&mut Text, &mut Visibility)>,
+    mut visibility_q: Query<&mut Visibility>,
+    mut text_q: Query<&mut Text>,
 ) {
-    let Ok([(mut health_text, mut health_visibility), (mut oxygen_text, mut oxygen_visibility)]) =
-        text_q.get_many_mut([
-            ui_elements.health_level_entity,
-            ui_elements.oxygen_level_entity,
-        ])
-    else {
+    let Ok(mut visibility) = visibility_q.get_mut(ui_elements.vitality.vitality_node_entity) else {
+        error!("Couldn't query player vitality visibility");
+        return;
+    };
+
+    let Ok([mut pressure_text, mut health_text, mut oxygen_text]) = text_q.get_many_mut([
+        ui_elements.vitality.pressure_level_entity,
+        ui_elements.vitality.health_level_entity,
+        ui_elements.vitality.oxygen_level_entity,
+    ]) else {
         error!("Couldn't query player health text");
         return;
     };
 
     let Ok(player_health) = local_player_q.get_single() else {
-        *health_visibility = Visibility::Hidden;
-        *oxygen_visibility = Visibility::Hidden;
+        *visibility = Visibility::Hidden;
         return;
     };
 
-    *health_visibility = Visibility::Inherited;
-    *oxygen_visibility = Visibility::Inherited;
+    *visibility = Visibility::Inherited;
 
-    health_text.0 = format!("Health {:.0}%", player_health.health);
-    oxygen_text.0 = format!("Oxygen {:.0}%", player_health.oxygen);
+    pressure_text.0 = format!("Pressure {:.0}%", player_health.pressure * 100.);
+    health_text.0 = format!("Health {:.0}", player_health.health);
+    oxygen_text.0 = format!("Oxygen {:.0}", player_health.oxygen);
 }

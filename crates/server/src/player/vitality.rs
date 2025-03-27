@@ -10,12 +10,10 @@ use crate::{
 
 use super::networking::ConnectedClient;
 
-/// How much of a player's oxygen is consumed per second.
-const PLAYER_BREATH_RATE: f32 = 2.5;
 /// How much of a player's oxygen is refilled per unit of module atmosphere.
 const PLAYER_OXYGEN_REFILL_RATIO: f32 = 50.;
 /// How much of a player's oxygen is refilled per second.
-const PLAYER_OXYGEN_REFILL_RATE: f32 = 100.;
+const PLAYER_OXYGEN_REFILL_RATE: f32 = 10.;
 
 const VITALITY_UPDATE_INTERVAL: Duration = Duration::from_millis(100);
 
@@ -52,7 +50,7 @@ fn update_oxygen(
 ) {
     for (mut vitality, grid_presence) in player_q.iter_mut() {
         // Remove oxygen from the player
-        vitality.oxygen = dbg!(vitality.oxygen - time.delta_secs() * PLAYER_BREATH_RATE);
+        vitality.oxygen = vitality.oxygen - time.delta_secs();
 
         // If the player is in a module refill their tank from that module
         if let Some(module_entity) = grid_presence.current_module {
@@ -60,6 +58,8 @@ fn update_oxygen(
                 error!("Couldn't query module atmosphere {:?}", module_entity);
                 continue;
             };
+
+            vitality.pressure = module_atmosphere.level / module_atmosphere.volume;
 
             // Find the required amount of oxygen to refill this tick.
             let difference = MAX_OXYGEN - vitality.oxygen;
@@ -72,6 +72,8 @@ fn update_oxygen(
             // Update the player's oxygen level and the module's oxygen level.
             vitality.oxygen += required_tank * satisfaction;
             module_atmosphere.level -= required_module * satisfaction;
+        } else {
+            vitality.pressure = 0.0;
         }
     }
 }

@@ -4,7 +4,11 @@ use common::mesh_colliders::GltfCollider;
 use crate::{
     elements::tank::Tank,
     grid_spaces,
-    modules::{atmosphere::TankAtmosphere, grid::ShipModuleTransform, networking::ModuleAssets},
+    modules::{
+        atmosphere::{ModuleAtmosphere, TankAtmosphere, Vent},
+        grid::ShipModuleTransform,
+        networking::ModuleAssets,
+    },
 };
 
 use super::{add_ship_module_type, InitShipModules, ShipModuleDescription, SpawnShipModule};
@@ -54,6 +58,12 @@ fn init_oxygen_storage_a_modules(
                 map_size: Vec2::new(3., 3.),
             },
             GltfCollider { mesh },
+            Vent { open: true },
+            ModuleAtmosphere {
+                volume: 2.,
+                level: 2.,
+                breached: false,
+            },
         ));
 
         commands
