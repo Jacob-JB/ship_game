@@ -24,6 +24,8 @@ pub fn server_client_protocol() -> ProtocolBuilder<ServerClientMessages> {
     protocol.add_message::<crate::elements::tank::NewTank>();
     protocol.add_message::<crate::elements::tank::UpdateTankState>();
     protocol.add_message::<crate::elements::tank::UpdateTankPercentage>();
+    protocol.add_message::<crate::elements::room_vent::NewRoomVent>();
+    protocol.add_message::<crate::elements::room_vent::UpdateRoomVent>();
 
     protocol
 }
@@ -35,6 +37,7 @@ pub fn client_server_protocol() -> ProtocolBuilder<ClientServerMessages> {
     protocol.add_message::<crate::player::ClientPlayerUpdate>();
     protocol.add_message::<crate::elements::ship_map::ShipMapMoveRequest>();
     protocol.add_message::<crate::elements::tank::RequestToggleTankEnabled>();
+    protocol.add_message::<crate::elements::room_vent::RequestToggleRoomVentEnabled>();
 
     protocol
 }

@@ -1,5 +1,3 @@
-use std::f32::consts::TAU;
-
 use avian3d::prelude::*;
 use bevy::prelude::*;
 use common::{

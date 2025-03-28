@@ -6,6 +6,7 @@ use bevy::{
 use common::{elements::tank::*, GameLayer};
 
 use crate::{
+    assets::GameAssets,
     entity_map::{LocalServerEntity, ServerEntityMap, ServerEntityMapper},
     networking::prelude::*,
     player::interaction::{Interactable, InteractionTarget},
@@ -17,8 +18,6 @@ use super::ModuleMessages;
 const TANK_SCREEN_RESOLUTION: UVec2 = UVec2::new(48, 48);
 
 pub fn build(app: &mut App) {
-    app.init_resource::<ValveHandleScene>();
-
     app.add_systems(
         Update,
         (
@@ -30,19 +29,6 @@ pub fn build(app: &mut App) {
             receive_tank_percentage_updates,
         ),
     );
-}
-
-#[derive(Resource)]
-struct ValveHandleScene(Handle<Scene>);
-
-impl FromWorld for ValveHandleScene {
-    fn from_world(world: &mut World) -> Self {
-        ValveHandleScene(
-            world
-                .resource::<AssetServer>()
-                .load("valve_handle.gltf#Scene0"),
-        )
-    }
 }
 
 #[derive(Component)]
@@ -65,7 +51,7 @@ fn spawn_tanks(
     mut mapper: ServerEntityMapper,
     mut screens: Screens,
     mut layers: ResMut<RenderLayerAllocater>,
-    valve_handle_scene: Res<ValveHandleScene>,
+    assets: Res<GameAssets>,
 ) {
     for NewTank {
         entity,
@@ -76,18 +62,11 @@ fn spawn_tanks(
     {
         let tank_entity = mapper.get_or_spawn(entity);
 
+        // screen
+
         let render_layer = layers.next();
 
-        let tank_transform = Transform {
-            translation,
-            rotation,
-            ..default()
-        };
-
-        let screen_entity = commands
-            .spawn(GlobalTransform::default())
-            .set_parent(tank_entity)
-            .id();
+        let screen_entity = commands.spawn_empty().set_parent(tank_entity).id();
 
         let screen_camera_entity = screens.create_screen(
             screen_entity,
@@ -97,6 +76,8 @@ fn spawn_tanks(
             default(),
             &[render_layer],
         );
+
+        // ui
 
         let tank_ui_root = commands
             .spawn((
@@ -123,7 +104,6 @@ fn spawn_tanks(
                     margin: UiRect::all(Val::Px(1.)),
                     ..default()
                 },
-                TargetCamera(screen_camera_entity),
             ))
             .set_parent(tank_ui_root)
             .id();
@@ -144,11 +124,16 @@ fn spawn_tanks(
             .set_parent(tank_ui_root)
             .id();
 
+        // enable handle
+
+        let tank_transform = Transform {
+            translation,
+            rotation,
+            ..default()
+        };
+
         let enable_handle_mesh_entity = commands
-            .spawn((
-                SceneRoot(valve_handle_scene.0.clone()),
-                Transform::default(),
-            ))
+            .spawn((SceneRoot(assets.valve_handle.clone()), Transform::default()))
             .id();
 
         let collider_transform = tank_transform.mul_transform(Transform {
@@ -178,7 +163,6 @@ fn spawn_tanks(
                 enabled: state.enabled,
             },
             tank_transform,
-            GlobalTransform::default(),
         ));
     }
 }
@@ -248,9 +232,9 @@ fn move_tank_handles(
         };
 
         let handle_angle = if tank.enabled {
-            0.0
-        } else {
             -std::f32::consts::FRAC_PI_2
+        } else {
+            0.0
         };
 
         *handle_transform = tank_transform.compute_transform().mul_transform(Transform {

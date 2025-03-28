@@ -11,6 +11,7 @@ pub fn build(app: &mut App) {
 
     ship_map::build(app);
     tank::build(app);
+    room_vent::build(app);
 }
 
 /// Marker type for the message queue used for element updates.

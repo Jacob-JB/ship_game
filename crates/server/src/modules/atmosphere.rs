@@ -33,7 +33,7 @@ pub struct ModuleAtmosphere {
 /// If a ship module doesn't contain a vent it can only be filled
 /// from other modules.
 #[derive(Component)]
-pub struct Vent {
+pub struct ModuleVent {
     pub open: bool,
 }
 
@@ -61,7 +61,7 @@ fn drain_breached_atmospheres(
 }
 
 fn fill_atmospheres(
-    mut module_q: Query<(&Vent, &mut ModuleAtmosphere)>,
+    mut module_q: Query<(&ModuleVent, &mut ModuleAtmosphere)>,
     fill_rate: Res<VentFillRate>,
     mut tank_q: Query<&mut TankAtmosphere>,
     time: Res<Time>,
@@ -104,7 +104,9 @@ fn fill_atmospheres(
     let drain_percent = (required_atmosphere * fill_percent) / available_atmosphere;
 
     for mut tank in tank_q.iter_mut() {
-        tank.level -= tank.level * drain_percent;
+        if tank.enabled {
+            tank.level -= tank.level * drain_percent;
+        }
     }
 
     for (vent, mut atmosphere) in module_q.iter_mut() {

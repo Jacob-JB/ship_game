@@ -2,10 +2,10 @@ use bevy::prelude::*;
 use common::mesh_colliders::GltfCollider;
 
 use crate::{
-    elements::tank::Tank,
+    elements::{room_vent::RoomVent, tank::Tank},
     grid_spaces,
     modules::{
-        atmosphere::{ModuleAtmosphere, TankAtmosphere, Vent},
+        atmosphere::{ModuleAtmosphere, ModuleVent, TankAtmosphere},
         grid::ShipModuleTransform,
         networking::ModuleAssets,
     },
@@ -58,7 +58,7 @@ fn init_oxygen_storage_a_modules(
                 map_size: Vec2::new(3., 3.),
             },
             GltfCollider { mesh },
-            Vent { open: true },
+            ModuleVent { open: true },
             ModuleAtmosphere {
                 volume: 2.,
                 level: 2.,
@@ -75,6 +75,14 @@ fn init_oxygen_storage_a_modules(
                     enabled: false,
                 },
                 Transform::from_xyz(-0.9, 1.8, 0.)
+                    .with_rotation(Quat::from_rotation_y(std::f32::consts::FRAC_PI_2)),
+            ))
+            .set_parent(module_entity);
+
+        commands
+            .spawn((
+                RoomVent { module_entity },
+                Transform::from_xyz(-0.9, 1.8, 0.4)
                     .with_rotation(Quat::from_rotation_y(std::f32::consts::FRAC_PI_2)),
             ))
             .set_parent(module_entity);

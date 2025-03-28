@@ -6,6 +6,7 @@ use bevy::{
 use common::{mesh_colliders::GltfColliderPlugin, state::JoinRequest};
 use state::ConnectToServer;
 
+pub mod assets;
 pub mod camera;
 pub mod elements;
 pub mod entity_map;
@@ -47,6 +48,7 @@ fn main() {
 
     networking::build(&mut app);
     entity_map::build(&mut app);
+    assets::build(&mut app);
     state::build(&mut app);
     physics::build(&mut app);
     player::build(&mut app);

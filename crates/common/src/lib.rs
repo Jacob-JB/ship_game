@@ -1,3 +1,8 @@
+//! The primary purposes of this crate are:
+//! - Define the networking protocol for the client and server
+//! - Provide a place to define common logic,
+//! such as the kinematic player controller which is run on the client and predicted on the server
+
 use avian3d::prelude::*;
 use bevy::prelude::*;
 use serde::{Deserialize, Serialize};
